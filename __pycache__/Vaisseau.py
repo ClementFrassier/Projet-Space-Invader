@@ -1,14 +1,15 @@
 from Projectile import projectile
 
 class vaisseau:
-    def __init__(self, position, graphic, vitesse, hauteur, largeur):
+    def __init__(self, position, graphic, vitesse_vaisseau, hauteur, largeur, point_de_vie):
         # Position est maintenant un tableau (liste) avec [x, y]
         self.position = position
-        self.pv = 3
         self.graphic = graphic
-        self.vitesse = vitesse
+        self.vitesse_vaisseau = vitesse_vaisseau
         self.largeur = largeur
         self.hauteur = hauteur
+        self.point_de_vie = point_de_vie
+        
 
     # Getter pour position (renvoie la liste entière)
     def get_position(self):
@@ -35,13 +36,13 @@ class vaisseau:
     def set_y(self, y):
         self.position[1] = y
 
-    # Getter pour pv
-    def get_pv(self):
-        return self.pv
+    # Getter pour point_de_vie
+    def get_point_de_vie(self):
+        return self.point_de_vie
 
-    # Setter pour pv
-    def set_pv(self, pv):
-        self.pv = pv
+    # Setter pour point_de_vie
+    def set_point_de_vie(self, point_de_vie):
+        self.point_de_vie = point_de_vie
 
     # Getter pour graphic
     def get_graphic(self):
@@ -49,11 +50,11 @@ class vaisseau:
 
     # Getter pour vitesse
     def get_vitesse(self):
-        return self.vitesse
+        return self.vitesse_vaisseau
 
     # Setter pour vitesse
-    def set_vitesse(self, vitesse):
-        self.vitesse = vitesse
+    def set_vitesse(self, vitesse_vaisseau):
+        self.vitesse = vitesse_vaisseau
 
     # Getter pour largeur
     def get_largeur(self):
@@ -70,10 +71,10 @@ class vaisseau:
         dt : valeur du déplacement
     """
     def move_vaisseau(self, dt):
-        self.position += dt * self.vitesse  
+        self.position += dt * self.vitesse_vaisseau  
 
 
-    def vaisseau_projectile(self, vitesse,rayon,graphic):
+    def vaisseau_projectile(self, vitesse_projectile,rayon,graphic):
         nouveau_projectile = projectile(
         position=[
             self.position[0] + self.largeur // 2 - 5,  # Centré horizontalement sur le vaisseau
@@ -81,7 +82,7 @@ class vaisseau:
             ],
             degat=1,
             graphic=graphic,
-            vitesse=vitesse,
+            vitesse_projectile=vitesse_projectile,
             rayon=rayon
         )
         return nouveau_projectile

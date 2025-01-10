@@ -1,10 +1,11 @@
 class ennemi:
-    def __init__(self, position, hauteur, largeur,graphic,vitesse):
+    def __init__(self, position, hauteur, largeur,graphic,vitesse_ennemi, point_de_vie):
         self.position = position
         self.hauteur=hauteur
         self.largeur=largeur
         self.graphic=graphic
-        self.vitesse=vitesse
+        self.vitesse_ennemi=vitesse_ennemi
+        self.point_de_vie=point_de_vie
 
     # Getter pour position
     def get_position(self):
@@ -23,18 +24,18 @@ class ennemi:
         self.graphic = graphic
 
     # Getter pour vitesse
-    def get_vitesse(self):
-        return self.vitesse
+    def get_vitesse_ennemi(self):
+        return self.vitesse_ennemi
 
     # Setter pour vitesse
-    def set_vitesse(self, vitesse):
-        self.vitesse = vitesse
+    def set_vitesse_ennemi(self, vitesse_ennemi):
+        self.vitesse_ennemi = vitesse_ennemi
 
     """
-    Déplace l'ennemi selon dt et la vitesse
+    Déplace l'ennemi selon dt et la vitesse_ennemi
     Paramètre :
         dt : valeur du déplacement
     """
     def move_ennemi(self, dt):
-        self.position += dt * self.vitesse  
+        self.position += dt * self.vitesse_ennemi  
 

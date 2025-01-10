@@ -1,9 +1,9 @@
 class projectile:
-    def __init__(self,graphic,vitesse,degat,rayon,position):
+    def __init__(self,graphic,vitesse_projectile,degat,rayon,position):
         self.position=position or [0,0]
         self.degat=degat
         self.graphic=graphic
-        self.vitesse=vitesse
+        self.vitesse_projectile=vitesse_projectile
         self.rayon=rayon
         
     
@@ -25,19 +25,18 @@ class projectile:
         return self.rayon
 
     # Getter pour vitesse
-    def get_vitesse(self):
-        return self.vitesse
+    def get_vitesse_projectile(self):
+        return self.vitesse_projectile
 
     # Setter pour vitesse
-    def set_vitesse(self, vitesse):
-        self.vitesse = vitesse
+    def set_vitesse_projectile(self, vitesse_projectile):
+        self.vitesse_projectile = vitesse_projectile
 
     """
-    Déplace le projectile selon dt et la vitesse
+    Déplace le projectile selon dt et la vitesse_projectile
     Paramètre :
         dt : valeur du déplacement
     """
     def move_projectile(self, dt):
-        self.position[0] += dt * self.vitesse[0]  # Déplacement horizontal
-        self.position[1] += dt * self.vitesse[1]  # Déplacement vertical  
+        self.position[1] += dt * self.vitesse_projectile  # Déplacement vertical  
 
