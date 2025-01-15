@@ -1,42 +1,28 @@
 class projectile:
-    def __init__(self,graphic,vitesse_projectile,degat,rayon,position):
-        self.position=position or [0,0]
-        self.degat=degat
-        self.graphic=graphic
-        self.vitesse_projectile=vitesse_projectile
-        self.rayon=rayon
-        
-    
-    # Setter pour position
-    def set_position(self, position):
-        self.position = position
+    def __init__(self, graphic, vitesse_projectile, direction, degat, rayon, position):
+        # Validation de la position
+        if not isinstance(position, (list, tuple)) or len(position) != 2:
+            raise ValueError("La position doit être une liste ou un tuple contenant [x, y].")
 
+        # Validation de la direction
+        if not isinstance(direction, int) or direction not in [-1, 1]:
+            raise ValueError("La direction doit être un entier valant -1 (monte) ou 1 (descend).")
 
-    # Getter pour degat
-    def get_degat(self):
-        return self.degat
+        # Validation de la vitesse
+        if not isinstance(vitesse_projectile, int):
+            raise ValueError("vitesse_projectile doit être un entier positif.")
 
-    # Setter pour degat
-    def set_degat(self, degat):
+        # Assignation des attributs
+        self.graphic = graphic
+        self.vitesse_projectile = vitesse_projectile  # Vitesse positive
+        self.direction = direction  # -1 pour monter, 1 pour descendre
         self.degat = degat
+        self.rayon = rayon
+        self.position = list(position)  # Copie pour éviter les références externes
 
-    # Getter pour rayon
-    def get_rayon(self):
-        return self.rayon
-
-    # Getter pour vitesse
-    def get_vitesse_projectile(self):
-        return self.vitesse_projectile
-
-    # Setter pour vitesse
-    def set_vitesse_projectile(self, vitesse_projectile):
-        self.vitesse_projectile = vitesse_projectile
-
-    """
-    Déplace le projectile selon dt et la vitesse_projectile
-    Paramètre :
-        dt : valeur du déplacement
-    """
     def move_projectile(self, dt):
-        self.position[1] += dt * self.vitesse_projectile  # Déplacement vertical  
+        # Le mouvement est influencé par la direction (-1 ou 1)
+        self.position[1] += dt * self.vitesse_projectile * self.direction
 
+    def is_out_of_bounds(self, screen_height):
+        return self.position[1] < 0 or self.position[1] >= screen_height
