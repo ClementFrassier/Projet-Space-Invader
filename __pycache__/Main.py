@@ -6,7 +6,14 @@ from Projectile import projectile
 from Jeu import jeu
 import random
 import time
+import os
 
+import cv2
+
+from FPSCounter import *
+from SkeletonTracker import *
+from Parsers import *
+from models import *
 
 # Constantes globales
 WINDOW_WIDTH, WINDOW_HEIGHT = 800, 600
@@ -71,7 +78,7 @@ def initialiser_objets(vaisseau_sprite, ennemi_sprite):
         vitesse_vaisseau=VITESSE_VAISSEAU,
         largeur=VAISSEAU_WIDTH,
         hauteur=VAISSEAU_HEIGHT,
-        point_de_vie=1
+        point_de_vie=10
     )
 
     ennemis = [
@@ -91,6 +98,17 @@ def initialiser_objets(vaisseau_sprite, ennemi_sprite):
     )
     return Vaisseau, ennemis, Jeu
 
+"""CAMERA////////////////////////////////////////////////////"""
+
+def savoir_main_ferme(y1, y2, x1, x2):
+    """
+    Vérifie si les coordonnées du point 2 (x2, y2) sont à ±0.1 
+    des coordonnées du point 1 (x1, y1).
+    """
+    if y1 is not None and y2 is not None and x1 is not None and x2 is not None:
+        if abs(y2 - y1) <= 0.2 and abs(x2 - x1) <= 0.2:
+            return True
+    return False
 
 def main():
     # Initialisation de la fenêtre de jeu
@@ -109,11 +127,81 @@ def main():
     last_shoot_time = time.time()
 
     pv_vaisseau_max=Vaisseau.point_de_vie
+    #CAMERAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    EPSILON = 1
+    video_path = 0 
+    cap = cv2.VideoCapture(video_path)
+    fps = FPSCounter()
+
+    params = SkeletonTrackerParameters()
+    params.use_yolo = False
+    params.use_body = False
+    params.max_bodies = 1
+    params.use_hands = True
+    params.use_face = False
+    params.hand_skip_frames = 10
+    params.models_paths = "PoseEstimation/models"
+    tracking = SkeletonTracker(params)
+
+    previous_x = None
     
+
     # Boucle principale
-    while True:
+    while True and cap.isOpened():
 
         game_window.fill(0)
+        #CAMERA
+        ret, img = cap.read()
+        if not ret:
+            break
+        img = cv2.resize(img, (320, 240))
+        img = cv2.flip(img, 1)
+
+        tracking.update(img)
+
+        for hand in tracking.hands:
+            img = hand.displaySkeleton(img)
+            articulation_paume = hand.skeleton()[0]
+            articulation_Middle = hand.skeleton()[12]
+
+            paume_x=articulation_paume[1]
+            paume_y=articulation_paume[0]
+
+            middle_x=articulation_Middle[1]
+            middle_y=articulation_Middle[0]
+
+            
+            if not np.isnan(articulation_paume).any():
+                current_x = articulation_paume[1]
+                if previous_x is not None:
+                    if current_x > previous_x:
+                        #Droite
+                        Vaisseau.position[0] = min(WINDOW_WIDTH - VAISSEAU_WIDTH, Vaisseau.position[0] + VITESSE_VAISSEAU)
+                    elif current_x < previous_x:
+                        #Gauche 
+                        Vaisseau.position[0] = max(0, Vaisseau.position[0] - VITESSE_VAISSEAU)
+
+                if savoir_main_ferme(paume_y, middle_y, paume_x, middle_x):
+                    current_time = time.time()
+                    if current_time - last_shoot_time >= 0.25: #4 tires par secondes 
+                        dernier_projectile = projectile(
+                            graphic=projectile_sprite,
+                            vitesse_projectile=VITESSE_PROJECTILES,
+                            direction=-1,  # Monte
+                            degat=1,
+                            rayon=PROJECTILE_RADIUS,
+                            position=[Vaisseau.position[0] + VAISSEAU_WIDTH // 2, Vaisseau.position[1]]
+                        )
+                        vaisseau_proj.append(dernier_projectile)
+                        last_shoot_time = current_time
+
+                previous_x = current_x
+                
+        fps.update()
+        img = fps.display(img)
+        cv2.imshow("Resultat", img)
+        key = cv2.waitKey(EPSILON) & 0xFF
+        #FIN CAMERA
 
         # Gestion des événements clavier
         key = cv2.waitKey(8) & 0xFF
