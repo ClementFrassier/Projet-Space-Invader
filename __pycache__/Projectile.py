@@ -26,3 +26,9 @@ class projectile:
 
     def is_out_of_bounds(self, screen_height):
         return self.position[1] < 0 or self.position[1] >= screen_height
+
+    def getPosition(self):
+        return self.position
+    
+    def getDegat(self):
+        return self.degat

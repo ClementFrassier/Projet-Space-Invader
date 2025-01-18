@@ -6,6 +6,7 @@ class ennemi:
         self.graphic=graphic
         self.vitesse_ennemi=vitesse_ennemi
         self.point_de_vie=point_de_vie
+        self.point_de_vie_max=point_de_vie
 
     # Getter pour position
     def get_position(self):
@@ -39,3 +40,11 @@ class ennemi:
     def move_ennemi(self, dt):
         self.position += dt * self.vitesse_ennemi  
 
+    def ennemi_projectile_interaction(self, projectile):
+        if (projectile.getPosition()[0] > self.position[0] and
+                projectile.getPosition()[0] < self.position[0] + self.largeur and
+                projectile.getPosition()[1]>self.position[1] and
+                projectile.getPosition()[1]<self.position[1] + self.hauteur):
+            self.point_de_vie -= projectile.getDegat()
+            return True
+        return False

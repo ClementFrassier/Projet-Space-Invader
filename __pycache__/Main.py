@@ -3,7 +3,25 @@ import numpy as np
 from Vaisseau import vaisseau
 from Ennemis import ennemi
 from Projectile import projectile
+from Jeu import jeu
 import random
+import time
+
+
+# Constantes globales
+WINDOW_WIDTH, WINDOW_HEIGHT = 800, 600
+VAISSEAU_WIDTH, VAISSEAU_HEIGHT = 60, 20
+PROJECTILE_RADIUS = 2
+ENNEMI_WIDTH, ENNEMI_HEIGHT = 40, 20
+
+# Vitesse
+VITESSE_VAISSEAU = 10
+VITESSE_PROJECTILES = 5
+VITESSE_ENNEMI = 4
+VITESSE_PROJECTILES_ENNEMI = 3
+
+# Probabilité de tir des ennemis
+PROBA_TIR_ENNEMI = 0.005  # 0.1% de chance de tirer à chaque frame
 
 
 def dessiner_barre_point_de_vie(fenetre, position, largeur, hauteur, point_de_vie, point_de_vie_max, couleur_fond=(50, 50, 50), couleur_point_de_vie=(0, 255, 0)):
@@ -26,70 +44,82 @@ def dessiner_barre_point_de_vie(fenetre, position, largeur, hauteur, point_de_vi
         cv2.rectangle(fenetre, position, (position[0] + largeur_point_de_vie, position[1] + hauteur), couleur_point_de_vie, -1)
 
 
-def main():
-    # Dimensions de la fenêtre
-    WINDOW_WIDTH, WINDOW_HEIGHT = 800, 600
-    VAISSEAU_WIDTH, VAISSEAU_HEIGHT = 60, 20
-    PROJECTILE_RADIUS = 2
-    ENNEMI_WIDTH, ENNEMI_HEIGHT = 40, 20
-
-    # Vitesse
-    vitesse_vaisseau = 10
-    vitesse_projectils = 5  # Vitesse des projectiles du vaisseau
-    vitesse_ennemi = 1  # Vitesse des ennemis
-    vitesse_projectils_ennemi = 3  # Vitesse des projectiles ennemis
-
-
-    # Créer la fenêtre
-    cv2.namedWindow("Space Invader")
-
-    # Création des sprites
+def initialiser_sprites():
+    """
+    Initialise les sprites utilisés dans le jeu.
+    :return: Les sprites pour les projectiles, le vaisseau et les ennemis.
+    """
     projectile_sprite = np.zeros((PROJECTILE_RADIUS * 2, PROJECTILE_RADIUS * 2, 3), dtype=np.uint8)
     cv2.circle(projectile_sprite, (PROJECTILE_RADIUS, PROJECTILE_RADIUS), PROJECTILE_RADIUS, (255, 0, 0), -1)
 
     vaisseau_sprite = np.ones((VAISSEAU_HEIGHT, VAISSEAU_WIDTH, 3), dtype=np.uint8) * 255
     ennemi_sprite = np.ones((ENNEMI_HEIGHT, ENNEMI_WIDTH, 3), dtype=np.uint8) * 255
 
-    # Initialisation des objets
+    return projectile_sprite, vaisseau_sprite, ennemi_sprite
+
+
+def initialiser_objets(vaisseau_sprite, ennemi_sprite):
+    """
+    Initialise les objets principaux du jeu (vaisseau, ennemis).
+    :param vaisseau_sprite: Sprite du vaisseau.
+    :param ennemi_sprite: Sprite des ennemis.
+    :return: Le vaisseau et la liste d'ennemis.
+    """
     Vaisseau = vaisseau(
         position=[270, 500],
         graphic=vaisseau_sprite,
-        vitesse_vaisseau=vitesse_vaisseau,
+        vitesse_vaisseau=VITESSE_VAISSEAU,
         largeur=VAISSEAU_WIDTH,
         hauteur=VAISSEAU_HEIGHT,
-        point_de_vie=10
+        point_de_vie=1
     )
 
     ennemis = [
         ennemi(
             position=[100 + i * 100, 100],
             graphic=ennemi_sprite,
-            vitesse_ennemi=vitesse_ennemi,
+            vitesse_ennemi=VITESSE_ENNEMI,
             largeur=ENNEMI_WIDTH,
             hauteur=ENNEMI_HEIGHT,
-            point_de_vie=3
+            point_de_vie=1
         )
         for i in range(5)
     ]
+    Jeu = jeu(
+        joueur = "j1",
+        score=0
+    )
+    return Vaisseau, ennemis, Jeu
 
-    ennemis_direction = [vitesse_ennemi, 0]
-    vaisseau_proj = []
-    ennemi_proj = []
 
-    # Fenêtre de jeu
+def main():
+    # Initialisation de la fenêtre de jeu
+    cv2.namedWindow("Space Invader")
     game_window = np.zeros((WINDOW_HEIGHT, WINDOW_WIDTH, 3), dtype=np.uint8)
 
-    # Gestion des touches
-    keys = {'left': False, 'right': False, 'shoot': False}
+    # Initialisation des sprites et objets
+    projectile_sprite, vaisseau_sprite, ennemi_sprite = initialiser_sprites()
+    Vaisseau, ennemis, Jeu = initialiser_objets(vaisseau_sprite, ennemi_sprite)
 
+    # Variables de jeu
+    ennemis_direction = [VITESSE_ENNEMI, 0]
+    vaisseau_proj = []
+    ennemi_proj = []
+    keys = {'left': False, 'right': False, 'shoot': False}
+    last_shoot_time = time.time()
+
+    pv_vaisseau_max=Vaisseau.point_de_vie
+    
+    # Boucle principale
     while True:
+
         game_window.fill(0)
 
         # Gestion des événements clavier
-        key = cv2.waitKey(1) & 0xFF
-        if key == 81:  # Flèche gauche
+        key = cv2.waitKey(8) & 0xFF
+        if key == 81 or key == ord("q"):  # Flèche gauche
             keys['left'] = True
-        elif key == 83:  # Flèche droite
+        elif key == 83 or key == ord("d"):  # Flèche droite
             keys['right'] = True
         elif key == 32:  # Barre d'espace
             keys['shoot'] = True
@@ -97,39 +127,46 @@ def main():
             keys = {'left': False, 'right': False, 'shoot': False}
         elif key == 27:  # ESC pour quitter
             break
+        
 
-        # Déplacement gauche/droite du vaisseau
+        # Déplacement du vaisseau
         if keys['left']:
-            Vaisseau.position[0] = max(0, Vaisseau.position[0] - vitesse_vaisseau)
+            Vaisseau.position[0] = max(0, Vaisseau.position[0] - VITESSE_VAISSEAU)
         if keys['right']:
-            Vaisseau.position[0] = min(WINDOW_WIDTH - VAISSEAU_WIDTH, Vaisseau.position[0] + vitesse_vaisseau)
+            Vaisseau.position[0] = min(WINDOW_WIDTH - VAISSEAU_WIDTH, Vaisseau.position[0] + VITESSE_VAISSEAU)
 
-        # Tir avec la barre d'espace
+        # Tir du vaisseau
         if keys['shoot']:
-            if not any(proj.position[1] < Vaisseau.position[1] for proj in vaisseau_proj):
-                nouveau_projectile = projectile(
+            current_time = time.time()
+            if current_time - last_shoot_time >= 0.25: #4 tires par secondes 
+                dernier_projectile = projectile(
                     graphic=projectile_sprite,
-                    vitesse_projectile=vitesse_projectils,
+                    vitesse_projectile=VITESSE_PROJECTILES,
                     direction=-1,  # Monte
                     degat=1,
                     rayon=PROJECTILE_RADIUS,
                     position=[Vaisseau.position[0] + VAISSEAU_WIDTH // 2, Vaisseau.position[1]]
                 )
-                vaisseau_proj.append(nouveau_projectile)
+                vaisseau_proj.append(dernier_projectile)
+                last_shoot_time = current_time
 
-        # Déplacement des ennemis comme un bloc
-        ennemis_bounds = [min(e.position[0] for e in ennemis), max(e.position[0] + ENNEMI_WIDTH for e in ennemis)]
-        if ennemis_bounds[0] <= 0 or ennemis_bounds[1] >= WINDOW_WIDTH:
-            ennemis_direction[0] = -ennemis_direction[0]
+
+        # Déplacement des ennemis
+        if ennemis:
+            ennemis_bounds = [min(e.position[0] for e in ennemis), max(e.position[0] + ENNEMI_WIDTH for e in ennemis)]
+            if ennemis_bounds[0] <= 0 or ennemis_bounds[1] >= WINDOW_WIDTH:
+                ennemis_direction[0] = -ennemis_direction[0]
+
+        if not ennemis:  # Si aucun ennemi n'est présent
+            ennemis = initialiser_objets(vaisseau_sprite, ennemi_sprite)[1]
 
         for Ennemi in ennemis[:]:
             Ennemi.position[0] += ennemis_direction[0]
-
-            # Les ennemis tirent de manière aléatoire
-            if random.random() < 0.01:
+            # Tir aléatoire des ennemis
+            if random.random() < PROBA_TIR_ENNEMI:
                 ennemi_proj.append(projectile(
                     graphic=projectile_sprite,
-                    vitesse_projectile=vitesse_projectils_ennemi,
+                    vitesse_projectile=VITESSE_PROJECTILES_ENNEMI,
                     direction=1,  # Descend
                     degat=1,
                     rayon=PROJECTILE_RADIUS,
@@ -140,18 +177,21 @@ def main():
             if Ennemi.point_de_vie > 0:
                 game_window[Ennemi.position[1]:Ennemi.position[1] + ENNEMI_HEIGHT,
                             Ennemi.position[0]:Ennemi.position[0] + ENNEMI_WIDTH] = Ennemi.graphic
-
-                # Barre de point de vie de l'ennemi
                 dessiner_barre_point_de_vie(
                     game_window,
                     position=(Ennemi.position[0], Ennemi.position[1] - 10),
                     largeur=ENNEMI_WIDTH,
                     hauteur=5,
                     point_de_vie=Ennemi.point_de_vie,
-                    point_de_vie_max=3
+                    point_de_vie_max=Ennemi.point_de_vie_max
                 )
+            
+            if Ennemi.point_de_vie <= 0:
+                ennemis.remove(Ennemi)
+                Jeu.score+=1
 
-        # Déplacement et affichage des projectiles du vaisseau
+        
+        # Déplacement et affichage des projectiles
         for proj in vaisseau_proj[:]:
             proj.move_projectile(1)
             if proj.is_out_of_bounds(WINDOW_HEIGHT):
@@ -163,8 +203,12 @@ def main():
                 x_end = min(WINDOW_WIDTH, proj.position[0] + PROJECTILE_RADIUS * 2)
                 if y_end > y_start and x_end > x_start:
                     graphic_part = proj.graphic[:y_end - y_start, :x_end - x_start]
-                    game_window[y_start:y_end, x_start:x_end] = graphic_part
+                    game_window[y_start:y_end, x_start :x_end] = graphic_part
+                    for Ennemi in ennemis[:]:
+                        if Ennemi.ennemi_projectile_interaction(proj):
+                            vaisseau_proj.remove(proj)
 
+ 
         # Déplacement et affichage des projectiles ennemis
         for proj in ennemi_proj[:]:
             proj.move_projectile(1)
@@ -178,25 +222,50 @@ def main():
                 if y_end > y_start and x_end > x_start:
                     graphic_part = proj.graphic[:y_end - y_start, :x_end - x_start]
                     game_window[y_start:y_end, x_start:x_end] = graphic_part
+                if Vaisseau.vaisseau_projectile_interaction(proj):
+                    ennemi_proj.remove(proj)
+                    
 
         # Affichage du vaisseau
-        y_start = max(0, Vaisseau.position[1])
-        y_end = min(WINDOW_HEIGHT, Vaisseau.position[1] + VAISSEAU_HEIGHT)
-        x_start = max(0, Vaisseau.position[0])
-        x_end = min(WINDOW_WIDTH, Vaisseau.position[0] + VAISSEAU_WIDTH)
+        if Vaisseau.point_de_vie>0:
+            y_start = max(0, Vaisseau.position[1])
+            y_end = min(WINDOW_HEIGHT, Vaisseau.position[1] + VAISSEAU_HEIGHT)
+            x_start = max(0, Vaisseau.position[0])
+            x_end = min(WINDOW_WIDTH, Vaisseau.position[0] + VAISSEAU_WIDTH)
 
-        if y_end > y_start and x_end > x_start:
-            game_window[y_start:y_end, x_start:x_end] = Vaisseau.graphic[:y_end - y_start, :x_end - x_start]
+            if y_end > y_start and x_end > x_start:
+                game_window[y_start:y_end, x_start:x_end] = Vaisseau.graphic[:y_end - y_start, :x_end - x_start]
+        
+        cv2.putText(game_window, f"Score: {Jeu.score}", (WINDOW_WIDTH - 150, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
-        # Barre de point de vie du vaisseau
         dessiner_barre_point_de_vie(
             game_window,
             position=(Vaisseau.position[0], Vaisseau.position[1] - 10),
             largeur=VAISSEAU_WIDTH,
             hauteur=5,
             point_de_vie=Vaisseau.point_de_vie,
-            point_de_vie_max=10
+            point_de_vie_max=pv_vaisseau_max
         )
+
+        #Si perdu
+        if Vaisseau.point_de_vie <= 0:
+            cv2.namedWindow("Perdu")
+            while True:
+                game_window.fill(0)
+                cv2.putText(game_window, "Perdu", (WINDOW_WIDTH // 2 - 50, WINDOW_HEIGHT // 2), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                cv2.putText(game_window, f"Score: {Jeu.score}", (WINDOW_WIDTH - 150, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+
+                cv2.imshow("Perdu", game_window)
+                key = cv2.waitKey(1) & 0xFF
+
+                if key == 27:  # ESC pour quitter
+                    break
+                elif key == 32:  # Barre d'espace pour relancer
+                    cv2.destroyAllWindows()
+                    main()
+
+            break
+
 
         # Affichage de la fenêtre
         cv2.imshow("Space Invader", game_window)
