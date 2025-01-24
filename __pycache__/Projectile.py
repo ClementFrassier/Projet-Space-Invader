@@ -1,3 +1,5 @@
+from Ennemis import *
+
 class projectile:
     def __init__(self, graphic, vitesse_projectile, direction, degat, rayon, position):
         # Validation de la position
@@ -32,3 +34,4 @@ class projectile:
     
     def getDegat(self):
         return self.degat
+    
