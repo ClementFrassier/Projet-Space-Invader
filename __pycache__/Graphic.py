@@ -26,55 +26,90 @@ class graphic:
 
 
 
-    def dessiner_ennemi(self,fenetre, ennemi_objet):
+    def dessiner_ennemi(self,fenetre, ennemi):
         """
         Dessine un ennemi sur la fenêtre de jeu.
 
         :param fenetre: Fenêtre de jeu.
-        :param ennemi_objet: Objet ennemi avec des attributs position, graphic, largeur, hauteur, point_de_vie, point_de_vie_max.
+        :param ennemi: Objet ennemi avec des attributs position, graphic, largeur, hauteur, point_de_vie, point_de_vie_max.
         """
-        if ennemi_objet.point_de_vie > 0:
+        if ennemi.point_de_vie > 0:
             # Dessiner l'ennemi
             fenetre[
-                ennemi_objet.position[1]:ennemi_objet.position[1] + ENNEMI_HEIGHT,
-                ennemi_objet.position[0]:ennemi_objet.position[0] + ENNEMI_WIDTH
-            ] = ennemi_objet.graphic
+                ennemi.position[1]:ennemi.position[1] + ENNEMI_HEIGHT,
+                ennemi.position[0]:ennemi.position[0] + ENNEMI_WIDTH
+            ] = ennemi.graphic
 
         # Dessiner la barre de vie de l'ennemi
         self.dessiner_barre_point_de_vie(
             fenetre,
-            position=(ennemi_objet.position[0], ennemi_objet.position[1] - 10),
+            position=(ennemi.position[0], ennemi.position[1] - 10),
             largeur=ENNEMI_WIDTH,
             hauteur=5,
-            point_de_vie=ennemi_objet.point_de_vie,
-            point_de_vie_max=ennemi_objet.point_de_vie_max
+            point_de_vie=ennemi.point_de_vie,
+            point_de_vie_max=ennemi.point_de_vie_max
         )
 
 
-    def dessiner_vaisseau(self,fenetre, vaisseau_objet):
+    def dessiner_vaisseau(self,fenetre, vaisseau):
         """
         Dessine le vaisseau sur la fenêtre de jeu.
 
         :param fenetre: Fenêtre de jeu.
-        :param vaisseau_objet: Objet vaisseau avec des attributs position, graphic, largeur, hauteur, point_de_vie, point_de_vie_max.
+        :param objet: Objet vaisseau avec des attributs position, graphic, largeur, hauteur, point_de_vie, point_de_vie_max.
         """
-        if vaisseau_objet.point_de_vie > 0:
+        if vaisseau.point_de_vie > 0:
             # Dessiner le vaisseau
             fenetre[
-                vaisseau_objet.position[1]:vaisseau_objet.position[1] + VAISSEAU_HEIGHT,
-                vaisseau_objet.position[0]:vaisseau_objet.position[0] + VAISSEAU_WIDTH
-            ] = vaisseau_objet.graphic
+                vaisseau.position[1]:vaisseau.position[1] + VAISSEAU_HEIGHT,
+                vaisseau.position[0]:vaisseau.position[0] + VAISSEAU_WIDTH
+            ] = vaisseau.graphic
 
             # Dessiner la barre de vie du vaisseau
             
             self.dessiner_barre_point_de_vie(
                 fenetre,
-                position=(vaisseau_objet.position[0], vaisseau_objet.position[1] - 10),
+                position=(vaisseau.position[0], vaisseau.position[1] - 10),
                 largeur=VAISSEAU_WIDTH,
                 hauteur=5,
-                point_de_vie=vaisseau_objet.point_de_vie,
-                point_de_vie_max=vaisseau_objet.point_de_vie_max
+                point_de_vie=vaisseau.point_de_vie,
+                point_de_vie_max=vaisseau.point_de_vie_max
             )
     
 
         
+        # Fonction pour dessiner les projectiles du vaisseau
+    def dessiner_projectile_vaisseau(self, fenetre, projectile):
+        """
+        Dessine un projectile du vaisseau sur la fenêtre de jeu.
+        
+        :param fenetre: Fenêtre de jeu.
+        :param projectile: Objet projectile du vaisseau avec des attributs position et graphic.
+        """
+        if projectile is not None:
+            y_start = max(0, projectile.position[1])
+            y_end = min(WINDOW_HEIGHT, projectile.position[1] + PROJECTILE_RADIUS * 2)
+            x_start = max(0, projectile.position[0])
+            x_end = min(WINDOW_WIDTH, projectile.position[0] + PROJECTILE_RADIUS * 2)
+            
+            if y_end > y_start and x_end > x_start:
+                graphic_part = projectile.graphic[:y_end - y_start, :x_end - x_start]
+                fenetre[y_start:y_end, x_start:x_end] = graphic_part
+
+    # Fonction pour dessiner les projectiles ennemis
+    def dessiner_projectile_ennemi(self, fenetre, projectile):
+        """
+        Dessine un projectile des ennemis sur la fenêtre de jeu.
+        
+        :param fenetre: Fenêtre de jeu.
+        :param projectile: Objet projectile de l'ennemi avec des attributs position et graphic.
+        """
+        if projectile is not None:
+            y_start = max(0, projectile.position[1])
+            y_end = min(WINDOW_HEIGHT, projectile.position[1] + PROJECTILE_RADIUS * 2)
+            x_start = max(0, projectile.position[0])
+            x_end = min(WINDOW_WIDTH, projectile.position[0] + PROJECTILE_RADIUS * 2)
+            
+            if y_end > y_start and x_end > x_start:
+                graphic_part = projectile.graphic[:y_end - y_start, :x_end - x_start]
+                fenetre[y_start:y_end, x_start:x_end] = graphic_part

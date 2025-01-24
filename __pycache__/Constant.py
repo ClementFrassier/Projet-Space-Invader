@@ -11,4 +11,5 @@ VITESSE_ENNEMI = 4
 VITESSE_PROJECTILES_ENNEMI = 3
 
 # Probabilité de tir des ennemis
-PROBA_TIR_ENNEMI = 0.0075  # 0.75% de chance de tirer à chaque frame
+PROBA_TIR_ENNEMI = 0.01 # 1% de chance de tirer à chaque frame
+
