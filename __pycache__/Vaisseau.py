@@ -9,7 +9,7 @@ class vaisseau:
         self.largeur = largeur
         self.hauteur = hauteur
         self.point_de_vie = point_de_vie
-        
+        self.point_de_vie_max=point_de_vie
 
     # Getter pour position (renvoie la liste entière)
     def get_position(self):

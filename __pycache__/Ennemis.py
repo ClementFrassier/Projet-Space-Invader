@@ -48,3 +48,5 @@ class ennemi:
             self.point_de_vie -= projectile.getDegat()
             return True
         return False
+
+    

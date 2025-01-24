@@ -12,7 +12,7 @@ from mediapipe.framework.formats import landmark_pb2
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
-from ultralytics import YOLO
+#from ultralytics import YOLO
 
 class Detection:
     maxTrack = 10
@@ -75,7 +75,8 @@ class SkeletonDetection(Detection):
             return self.cachedSkeleton
         if not np.isnan(self.lastSkeleton).all():
             self.skeleton_history = np.append(self.skeleton_history, [self.lastSkeleton], axis=0)
-        n = 5
+        #LISSAGE
+        n = 1
         num_articulations = self.skeleton_history.shape[1]  # number of articulations
         num_coordinates = self.skeleton_history.shape[2]  # dimensions of coordinates (e.g., x, y, z)
 
@@ -335,7 +336,7 @@ class SkeletonTrackerParameters:
     def __init__(self):
         root_path = os.path.dirname(__file__)
         self.models_paths = root_path + "/models"
-
+        
         self.use_body = False
         self.max_bodies = 1
         self.body_model_filename = "pose_landmarker.task"
@@ -346,7 +347,7 @@ class SkeletonTrackerParameters:
         self.face_model_filename = "face_landmarker_v2_with_blendshapes.task"
         self.face_landmarks_path = self.models_paths + "/face_landmarks/" + self.face_model_filename
         self.face_skip_frames = 2
-
+        
         self.use_hands = False
         self.hand_model_filename = "hand_landmarker.task"
         self.hand_model_path = self.models_paths + "/hand/" + self.hand_model_filename
@@ -409,7 +410,7 @@ class SkeletonTracker:
             base_options=python.BaseOptions(model_asset_path=parameters.hand_model_path),
             num_hands=self.max_bodies * 2))
 
-        self.yolo_net = YOLO(parameters.yolo_model_path)
+        self.yolo_net = None #YOLO(parameters.yolo_model_path)
         self.yolo_threshold = parameters.yolo_threshold
 
         aruco_dictionary = cv2.aruco.getPredefinedDictionary(parameters.aruco_dictionary)
