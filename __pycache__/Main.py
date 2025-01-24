@@ -139,7 +139,7 @@ def main():
     params.max_bodies = 1
     params.use_hands = True
     params.use_face = False
-    params.hand_skip_frames = 10
+    params.hand_skip_frames = 1
     params.models_paths = "PoseEstimation/models"
     tracking = SkeletonTracker(params)
 
@@ -154,7 +154,7 @@ def main():
         ret, img = cap.read()
         if not ret:
             break
-        img = cv2.resize(img, (320, 240))
+        img = cv2.resize(img, (300, 240))
         img = cv2.flip(img, 1)
 
         tracking.update(img)
@@ -174,12 +174,13 @@ def main():
             if not np.isnan(articulation_paume).any():
                 current_x = articulation_paume[1]
                 if previous_x is not None:
-                    if current_x > previous_x:
+                    #0.01 = correction d'erreur
+                    if current_x > previous_x + 0.01:
                         #Droite
-                        Vaisseau.position[0] = min(WINDOW_WIDTH - VAISSEAU_WIDTH, Vaisseau.position[0] + VITESSE_VAISSEAU)
-                    elif current_x < previous_x:
+                        Vaisseau.position[0] = min(WINDOW_WIDTH - VAISSEAU_WIDTH, Vaisseau.position[0] + VITESSE_VAISSEAU*2)
+                    elif current_x < previous_x - 0.01:
                         #Gauche 
-                        Vaisseau.position[0] = max(0, Vaisseau.position[0] - VITESSE_VAISSEAU)
+                        Vaisseau.position[0] = max(0, Vaisseau.position[0] - VITESSE_VAISSEAU*2)
 
                 if savoir_main_ferme(paume_y, middle_y, paume_x, middle_x):
                     current_time = time.time()
