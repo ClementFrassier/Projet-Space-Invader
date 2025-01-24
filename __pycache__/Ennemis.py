@@ -49,4 +49,4 @@ class ennemi:
             return True
         return False
 
-    
+        
