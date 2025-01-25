@@ -18,8 +18,9 @@ from Constant import *
 game = spaceInvader()
 game_graphic = graphic()
 
-
 def main():
+    nombre_ennemi=1
+
     while True:
         # Initialisation de la fenêtre de jeu
         cv2.namedWindow("Space Invader")
@@ -27,7 +28,7 @@ def main():
 
         # Initialisation des sprites et objets
         projectile_vaisseau_sprite, projectile_ennemi_sprite, vaisseau_sprite, ennemi_sprite = game.initialiser_sprites()
-        Vaisseau, ennemis, Jeu = game.initialiser_objets(vaisseau_sprite, ennemi_sprite)
+        Vaisseau, ennemis, Jeu = game.initialiser_objets(vaisseau_sprite, ennemi_sprite,nombre_ennemi)
 
         # Variables de jeu
         ennemis_direction = [VITESSE_ENNEMI, 0]
@@ -73,7 +74,9 @@ def main():
 
             #Si tous les ennemis detruits :
             if not ennemis:
-                _ , ennemis, _ = game.initialiser_objets(vaisseau_sprite, ennemi_sprite)
+                if nombre_ennemi <= 3:
+                    nombre_ennemi+=1
+                _ , ennemis, _ = game.initialiser_objets(vaisseau_sprite, ennemi_sprite,nombre_ennemi)
 
             # Déplacement et affichage des projectiles
             vaisseau_proj = game.gerer_projectiles_vaisseau(vaisseau_proj, ennemis, game_graphic, game_window)
@@ -96,6 +99,7 @@ def main():
 
         #  gestion si perdi
         while game_over:
+            nombre_ennemi=1
             game_window.fill(0)
             cv2.putText(game_window, "Perdu", (WINDOW_WIDTH // 2 - 50, WINDOW_HEIGHT // 2), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             cv2.putText(game_window, f"Score: {Jeu.score}", (WINDOW_WIDTH - 150, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
@@ -107,6 +111,7 @@ def main():
                 cv2.destroyAllWindows()
                 return
             elif key == 32:  # Barre d'espace pour relancer
+
                 game_over = False  
 
         cv2.destroyWindow("Space Invader")  

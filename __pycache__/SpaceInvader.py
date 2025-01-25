@@ -5,7 +5,16 @@ from Ennemis import ennemi
 from Projectile import projectile
 from Jeu import jeu
 from Constant import *
+import random
+import time
+import os
 
+import cv2
+
+from FPSCounter import *
+from SkeletonTracker import *
+from Parsers import *
+from models import *
 
 
 
@@ -27,17 +36,18 @@ class spaceInvader :
         projectile_ennemi_sprite = np.zeros((PROJECTILE_RADIUS * 2, PROJECTILE_RADIUS * 2, 3), dtype=np.uint8)
         cv2.circle(projectile_ennemi_sprite, (PROJECTILE_RADIUS, PROJECTILE_RADIUS), PROJECTILE_RADIUS, (0, 0, 255), -1)
 
-        # Sprite du vaisseau (blanc)
-        vaisseau_sprite = np.ones((VAISSEAU_HEIGHT, VAISSEAU_WIDTH, 3), dtype=np.uint8) * 255
 
-        # Sprite des ennemis (blanc)
-        ennemi_sprite = np.ones((ENNEMI_HEIGHT, ENNEMI_WIDTH, 3), dtype=np.uint8) * 255
+        vaisseau_sprite = cv2.imread("image/vaisseau.png", cv2.IMREAD_UNCHANGED)
+        ennemi_sprite = cv2.imread("image/ennemi.png", cv2.IMREAD_UNCHANGED)
 
+        if vaisseau_sprite is None or ennemi_sprite is None:
+            raise FileNotFoundError("Un ou plusieurs fichiers d'image sont introuvables.")
+        
         return projectile_vaisseau_sprite, projectile_ennemi_sprite, vaisseau_sprite, ennemi_sprite
 
 
 
-    def initialiser_objets(self,vaisseau_sprite, ennemi_sprite):
+    def initialiser_objets(self,vaisseau_sprite, ennemi_sprite, nombreEnnemis):
         """
         Initialise les objets principaux du jeu (vaisseau, ennemis).
         :param vaisseau_sprite: Sprite du vaisseau.
@@ -62,7 +72,7 @@ class spaceInvader :
                 hauteur=ENNEMI_HEIGHT,
                 point_de_vie=1
             )
-            for i in range(5)
+            for i in range(nombreEnnemis)
         ]
         Jeu = jeu(
             joueur = "j1",
@@ -159,4 +169,3 @@ class spaceInvader :
                     ennemi_proj.remove(proj)
 
         return ennemi_proj
-
