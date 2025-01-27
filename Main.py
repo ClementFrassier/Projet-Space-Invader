@@ -19,18 +19,13 @@ from Son import *
 
 
 def main():
-
-
     pygame.init()
     init_son()
-
     explosion_sound = charger_effet_sonore("son/sonExplosion.mp3")
     explosion_sound.set_volume(0.1)  # Explosion à 10 % du volume
-
     # Charger les effets sonores
     tir_sound = charger_effet_sonore("son/sonTir.mp3")
     tir_sound.set_volume(0.01)  # Tir à 5 % du volume
-
     # Charger et jouer la musique de fond
     charger_musique("son/MusiqueFondJeu.mp3") 
     jouer_musique(volume=1.0)
