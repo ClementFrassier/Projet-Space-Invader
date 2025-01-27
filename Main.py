@@ -12,23 +12,25 @@ from FPSCounter import *
 from SkeletonTracker import *
 from Parsers import *
 from models import *
-
+from BDD import *
 from Constant import *
 
-game = spaceInvader()
-game_graphic = graphic()
+
 
 def main():
+    game = spaceInvader()
+    game_graphic = graphic()
     nombre_ennemi=1
-
+    name=game.menu_princiapl()
+    
     while True:
         # Initialisation de la fenêtre de jeu
         cv2.namedWindow("Space Invader")
         game_window = np.zeros((WINDOW_HEIGHT, WINDOW_WIDTH, 3), dtype=np.uint8)
-
+        
         # Initialisation des sprites et objets
         projectile_vaisseau_sprite, projectile_ennemi_sprite, vaisseau_sprite, ennemi_sprite = game.initialiser_sprites()
-        Vaisseau, ennemis, Jeu = game.initialiser_objets(vaisseau_sprite, ennemi_sprite,nombre_ennemi)
+        Vaisseau, ennemis, Jeu = game.initialiser_objets(vaisseau_sprite, ennemi_sprite,nombre_ennemi,name)
 
         # Variables de jeu
         ennemis_direction = [VITESSE_ENNEMI, 0]
@@ -58,6 +60,7 @@ def main():
         # Boucle principale
         game_over = False
         while not game_over and cap.isOpened():
+            
             game_window.fill(0)
 
             # Gestion de la caméra
@@ -76,7 +79,7 @@ def main():
             if not ennemis:
                 if nombre_ennemi <= 3:
                     nombre_ennemi+=1
-                _ , ennemis, _ = game.initialiser_objets(vaisseau_sprite, ennemi_sprite,nombre_ennemi)
+                _ , ennemis, _ = game.initialiser_objets(vaisseau_sprite, ennemi_sprite,nombre_ennemi,name)
 
             # Déplacement et affichage des projectiles
             vaisseau_proj = game.gerer_projectiles_vaisseau(vaisseau_proj, ennemis, game_graphic, game_window)
@@ -107,14 +110,43 @@ def main():
             cv2.imshow("Space Invader", game_window)
             key = cv2.waitKey(1) & 0xFF
 
-            if key == 27:  # ESC pour quitter
-                cv2.destroyAllWindows()
+            if key == 27:
+                # Appeler la fonction pour mettre à jour la base de données
+                result = save_game(name, Jeu.score)
+                if "error" in result:
+                    print(f"Erreur lors de l'enregistrement : {result['error']}")
+                else:
+                    print(f"Partie enregistrée avec succès pour {name} avec un score de {Jeu.score}.")
+                # Afficher les 20 premières lignes de la base de données
+                print("\n--- Top 20 des scores enregistrés ---")
+                games = get_games()
+                if "error" in games:
+                    print(f"Erreur lors de la récupération des scores : {games['error']}")
+                else:
+                    for i, game in enumerate(games[:20], start=1):  # Limiter à 20 lignes
+                        print(f"{i}. ID: {game['id']}, Joueur: {game['player_name']}, Score: {game['score']}, Date: {game['timestamp']}")
                 return
-            elif key == 32:  # Barre d'espace pour relancer
+            
 
-                game_over = False  
+            elif key == 32:  # Barre d'espace pour relancer
+                # Appeler la fonction pour mettre à jour la base de données
+                result = save_game(name, Jeu.score)
+                if "error" in result:
+                    print(f"Erreur lors de l'enregistrement : {result['error']}")
+                else:
+                    print(f"Partie enregistrée avec succès pour {name} avec un score de {Jeu.score}.")
+                    game_over = False
+                # Afficher les 20 premières lignes de la base de données
+                print("\n--- Top 20 des scores enregistrés ---")
+                games = get_games()
+                if "error" in games:
+                    print(f"Erreur lors de la récupération des scores : {games['error']}")
+                else:
+                    for i, game in enumerate(games[:20], start=1):  # Limiter à 20 lignes
+                        print(f"{i}. ID: {game['id']}, Joueur: {game['player_name']}, Score: {game['score']}, Date: {game['timestamp']}")
 
         cv2.destroyWindow("Space Invader")  
+
 
 if __name__ == "__main__":
     main()

@@ -20,8 +20,77 @@ from models import *
 
 
 class spaceInvader : 
+    
     def __init__(self):
-        pass
+        self.input_text = ""  # Stocke le texte entré
+        self.confirmed_text = ""  # Stocke le texte confirmé
+        self.is_typing = False  # Flag pour détecter si on est en train de taper
+            
+
+    def mouse_callback(self, event, x, y, flags, param):
+        """Handles mouse clicks for text input and OK button."""
+        if event == cv2.EVENT_LBUTTONDOWN:
+            # Check if the click is inside the text input box
+            if 50 <= x <= 300 and 50 <= y <= 100:  # Text input area
+                self.is_typing = True  # Start typing
+            # Check if the click is on the OK button
+            elif 350 <= x <= 450 and 50 <= y <= 100:  # OK button
+                self.is_typing = False  # Stop typing
+                self.confirmed_text = self.input_text  # Confirm the text
+
+    def menu_princiapl(self):
+        """Displays the main menu, allowing the player to enter their name."""
+        cv2.namedWindow("Menu principal")
+        cv2.setMouseCallback("Menu principal", self.mouse_callback)  # Link the mouse callback
+
+        while True:
+            # Create the menu background
+            menu_principal = np.zeros((WINDOW_HEIGHT, WINDOW_WIDTH, 3), dtype=np.uint8)
+
+            # Draw the text input box
+            cv2.rectangle(menu_principal, (50, 50), (300, 100), (200, 200, 200), -1)
+            cv2.rectangle(menu_principal, (50, 50), (300, 100), (0, 0, 0), 2)
+
+            # Display the current input text
+            cv2.putText(menu_principal, self.input_text, (60, 85), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+
+            # Draw the OK button
+            cv2.rectangle(menu_principal, (350, 50), (450, 100), (100, 200, 100), -1)
+            cv2.putText(menu_principal, "OK", (370, 85), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
+
+            # Display the confirmed name
+            cv2.putText(menu_principal, f"Confirmed: {self.confirmed_text}", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
+
+            # Show the menu
+            cv2.imshow("Menu principal", menu_principal)
+            key = cv2.waitKey(1) & 0xFF
+
+            # Handle keyboard input while typing
+            if self.is_typing:
+                if key == 8:  # Backspace
+                    self.input_text = self.input_text[:-1]
+                elif key == 13:  # Enter key
+                    self.confirmed_text = self.input_text  # Confirm the input
+                    self.is_typing = False
+                    break  # Exit the menu to start the game
+                elif key != 255:  # Any other key (avoid unprintable keys)
+                    self.input_text += chr(key)
+
+            # Allow exiting the menu with the Escape key
+            if key == 27:  # Escape key
+                cv2.destroyAllWindows()
+                exit()  # Exit the program
+
+        cv2.destroyAllWindows()
+        return self.confirmed_text  # Return the player's name
+
+
+
+
+
+
+
+
 
     def initialiser_sprites(self):
         """
@@ -47,7 +116,7 @@ class spaceInvader :
 
 
 
-    def initialiser_objets(self,vaisseau_sprite, ennemi_sprite, nombreEnnemis):
+    def initialiser_objets(self,vaisseau_sprite, ennemi_sprite, nombreEnnemis,nom):
         """
         Initialise les objets principaux du jeu (vaisseau, ennemis).
         :param vaisseau_sprite: Sprite du vaisseau.
@@ -75,7 +144,7 @@ class spaceInvader :
             for i in range(nombreEnnemis)
         ]
         Jeu = jeu(
-            joueur = "j1",
+            joueur = nom,
             score=0
         )
         return Vaisseau, ennemis, Jeu
