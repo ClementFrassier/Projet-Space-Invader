@@ -1,3 +1,5 @@
+from Son import *
+
 class ennemi:
     def __init__(self, position, hauteur, largeur,graphic,vitesse_ennemi, point_de_vie):
         self.position = position
@@ -40,12 +42,17 @@ class ennemi:
     def move_ennemi(self, dt):
         self.position += dt * self.vitesse_ennemi  
 
-    def ennemi_projectile_interaction(self, projectile):
+    def ennemi_projectile_interaction(self, projectile, explosion_sound=None):
         if (projectile.getPosition()[0] > self.position[0] and
                 projectile.getPosition()[0] < self.position[0] + self.largeur and
                 projectile.getPosition()[1]>self.position[1] and
                 projectile.getPosition()[1]<self.position[1] + self.hauteur):
             self.point_de_vie -= projectile.getDegat()
+            
+            # Jouer le son d'explosion si disponible
+            if explosion_sound:
+                explosion_sound.play()
+                
             return True
         return False
 

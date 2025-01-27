@@ -5,11 +5,14 @@ from SkeletonTracker import *
 from Parsers import *
 from models import *
 import time
+from Son import *
+
 class camera :
-    def __init__(self, cap):
+    def __init__(self, cap, tir_sound=None):
         self.cap = cap
         self.previous_x = None
         self.last_shoot_time = time.time()
+        self.tir_sound = tir_sound
 
 
     def savoir_main_ferme(self,y1, y2, x1, x2):
@@ -69,6 +72,10 @@ class camera :
                         dernier_projectile = game.create_vaisseau_proj(projectile_sprite, vaisseau)
                         vaisseau_proj.append(dernier_projectile)
                         last_shoot_time = current_time
+
+                        # Jouer le son du tir
+                        if self.tir_sound:
+                            self.tir_sound.play()
 
                 previous_x = current_x
 
