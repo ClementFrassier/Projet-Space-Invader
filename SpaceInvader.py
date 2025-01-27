@@ -26,7 +26,11 @@ class spaceInvader :
         self.confirmed_text = ""  # Stocke le texte confirmé
         self.is_typing = False  # Flag pour détecter si on est en train de taper
         self.explosion_sound = explosion_sound
+<<<<<<< HEAD
         self.font = cv2.FONT_HERSHEY_SIMPLEX  
+=======
+        self.font = cv2.FONT_HERSHEY_SIMPLEX         
+>>>>>>> de87c3c1c2bc7a683cb695bbe0ef96ca2a6cf62b
 
 
     def mouse_callback(self, event, x, y, flags, param):
@@ -280,3 +284,4 @@ class spaceInvader :
                     ennemi_proj.remove(proj)
 
         return ennemi_proj
+
