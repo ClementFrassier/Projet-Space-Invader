@@ -40,7 +40,7 @@ def main():
     game = spaceInvader(explosion_sound)
     game_graphic = graphic()
     nombre_ennemi=1
-    name=game.menu_princiapl()
+    name=game.menu_principal()
     
 
     while True:
@@ -82,7 +82,7 @@ def main():
         while not game_over and cap.isOpened():
             
             game_window.fill(0)
-
+            game.add_starfield(game_window)
             # Gestion de la caméra
             previous_x, last_shoot_time, vaisseau_proj = game_camera.gerer_camera(previous_x, last_shoot_time, Vaisseau, game, tracking, projectile_vaisseau_sprite, vaisseau_proj)
 
@@ -120,15 +120,29 @@ def main():
             # Affichage de la fenêtre
             cv2.imshow("Space Invader", game_window)
 
-        #  gestion si perdi
+        #  gestion si perdu
         while game_over:
+            
             nombre_ennemi=1
             game_window.fill(0)
-            cv2.putText(game_window, "Perdu", (WINDOW_WIDTH // 2 - 50, WINDOW_HEIGHT // 2), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(game_window, "Lost", (WINDOW_WIDTH // 2 - 50, WINDOW_HEIGHT // 7), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 2)
             cv2.putText(game_window, f"Score: {Jeu.score}", (WINDOW_WIDTH - 150, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            game.add_starfield(game_window)
+            cv2.putText(game_window, "Leaderboard :", (1, WINDOW_HEIGHT // 4), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
+            games = get_games()
+            if "error" in games:
+                cv2.putText(game_window, "Erreur lors de la récupération des scores : {game_data['error']}", (WINDOW_WIDTH //2 - 50, WINDOW_HEIGHT // 4+10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+            else:
+                for i, game_data in enumerate(games[:10], start=1):  # Limiter à 20 lignes
+                    cv2.putText(game_window, f"{i}. ID: {game_data['id']}, Joueur: {game_data['player_name']}, Score: {game_data['score']}, Date: {game_data['timestamp']}", (1, WINDOW_HEIGHT // 4+10+i*30 ), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+
+        
             cv2.imshow("Space Invader", game_window)
             key = cv2.waitKey(1) & 0xFF
+            if cv2.getWindowProperty("Camera Feed", cv2.WND_PROP_VISIBLE) >= 1:
+                cv2.destroyWindow("Camera Feed")
+
 
             if key == 27:
                 # Appeler la fonction pour mettre à jour la base de données
@@ -137,15 +151,7 @@ def main():
                     print(f"Erreur lors de l'enregistrement : {result['error']}")
                 else:
                     print(f"Partie enregistrée avec succès pour {name} avec un score de {Jeu.score}.")
-                # Afficher les 20 premières lignes de la base de données
-                print("\n--- Top 20 des scores enregistrés ---")
-                games = get_games()
-                if "error" in games:
-                    print(f"Erreur lors de la récupération des scores : {games['error']}")
-                else:
-                    for i, game in enumerate(games[:20], start=1):  # Limiter à 20 lignes
-                        print(f"{i}. ID: {game['id']}, Joueur: {game['player_name']}, Score: {game['score']}, Date: {game['timestamp']}")
-                arreter_musique()
+
                 return
             
 
@@ -156,19 +162,11 @@ def main():
                     print(f"Erreur lors de l'enregistrement : {result['error']}")
                 else:
                     print(f"Partie enregistrée avec succès pour {name} avec un score de {Jeu.score}.")
-                    game_over = False
-                # Afficher les 20 premières lignes de la base de données
-                print("\n--- Top 20 des scores enregistrés ---")
-                games = get_games()
-                if "error" in games:
-                    print(f"Erreur lors de la récupération des scores : {games['error']}")
-                else:
-                    for i, game in enumerate(games[:20], start=1):  # Limiter à 20 lignes
-                        print(f"{i}. ID: {game['id']}, Joueur: {game['player_name']}, Score: {game['score']}, Date: {game['timestamp']}")
-                arreter_musique()
-
+                cv2.destroyWindow("Space Invader")
+                main()
         cv2.destroyWindow("Space Invader")  
     
+
 
 
 if __name__ == "__main__":

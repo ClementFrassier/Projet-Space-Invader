@@ -39,28 +39,76 @@ class spaceInvader :
                 self.is_typing = False  # Stop typing
                 self.confirmed_text = self.input_text  # Confirm the text
 
-    def menu_princiapl(self):
+    import cv2
+import numpy as np
+import random
+
+class spaceInvader : 
+    def __init__(self):
+        self.input_text = ""  # Stocke le texte entré
+        self.confirmed_text = ""  # Stocke le texte confirmé
+        self.is_typing = False  # Flag pour détecter si on est en train de taper
+        self.font = cv2.FONT_HERSHEY_SIMPLEX  
+
+    def mouse_callback(self, event, x, y, flags, param):
+        """Handles mouse clicks for text input and OK button."""
+        if event == cv2.EVENT_LBUTTONDOWN:
+            # Check if the click is inside the text input box
+            if WINDOW_WIDTH // 2 - 125 <= x <= WINDOW_WIDTH // 2 + 125 and WINDOW_HEIGHT // 2 - 25 <= y <= WINDOW_HEIGHT // 2 + 25:  # Text input area
+                self.is_typing = True  # Start typing
+
+
+    def menu_principal(self):
         """Displays the main menu, allowing the player to enter their name."""
         cv2.namedWindow("Menu principal")
         cv2.setMouseCallback("Menu principal", self.mouse_callback)  # Link the mouse callback
 
         while True:
-            # Create the menu background
+            # Create the menu background (Space theme background)
             menu_principal = np.zeros((WINDOW_HEIGHT, WINDOW_WIDTH, 3), dtype=np.uint8)
 
-            # Draw the text input box
-            cv2.rectangle(menu_principal, (50, 50), (300, 100), (200, 200, 200), -1)
-            cv2.rectangle(menu_principal, (50, 50), (300, 100), (0, 0, 0), 2)
+            # Add space background (a field of stars)
+            self.add_starfield(menu_principal)
 
-            # Display the current input text
-            cv2.putText(menu_principal, self.input_text, (60, 85), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+            # Centering calculations
+            text_box_width = 250
+            text_box_height = 50
+            center_x = WINDOW_WIDTH // 2
+            center_y = WINDOW_HEIGHT // 2
 
-            # Draw the OK button
-            cv2.rectangle(menu_principal, (350, 50), (450, 100), (100, 200, 100), -1)
-            cv2.putText(menu_principal, "OK", (370, 85), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
+            # Draw the text input box at the center
+            top_left_x = center_x - text_box_width // 2
+            top_left_y = center_y - text_box_height // 2
+            bottom_right_x = center_x + text_box_width // 2
+            bottom_right_y = center_y + text_box_height // 2
 
-            # Display the confirmed name
-            cv2.putText(menu_principal, f"Confirmed: {self.confirmed_text}", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
+            cv2.rectangle(menu_principal, (top_left_x, top_left_y), (bottom_right_x, bottom_right_y), (200, 200, 200), -1)
+            cv2.rectangle(menu_principal, (top_left_x, top_left_y), (bottom_right_x, bottom_right_y), (255, 255, 255), 2)
+
+            # Display the current input text inside the centered box
+            text_position_x = top_left_x + 10
+            text_position_y = top_left_y + 30
+            cv2.putText(menu_principal, self.input_text, (text_position_x, text_position_y), self.font, 0.7, (0, 0, 0), 2)
+
+            # Add instruction text below the input box
+            # Instruction text
+            instruction_text = "Press enter to play"
+            instruction_text2 = "Click the box below to enter your name"  # Keep as string
+
+            # Get text sizes
+            text_size = cv2.getTextSize(instruction_text, self.font, 0.7, 2)[0]
+            text_size2 = cv2.getTextSize(instruction_text2, self.font, 0.7, 2)[0]
+
+            # Calculate positions
+            instruction_x = center_x - text_size[0] // 2
+            instruction_y = bottom_right_y + 40
+
+            instruction_x2 = center_x - text_size2[0] // 2
+            instruction_y2 = bottom_right_y - 75   # Adjusted to avoid overlap
+
+            # Display text
+            cv2.putText(menu_principal, instruction_text, (instruction_x, instruction_y), self.font, 0.7, (255, 0, 255), 2)
+            cv2.putText(menu_principal, instruction_text2, (instruction_x2, instruction_y2), self.font, 0.7, (255, 0, 255), 2)
 
             # Show the menu
             cv2.imshow("Menu principal", menu_principal)
@@ -86,12 +134,24 @@ class spaceInvader :
         return self.confirmed_text  # Return the player's name
 
 
+    def add_starfield(self, image):
+        """Adds a field of stars in the background to simulate space."""
+        for _ in range(200):  # Number of stars
+            x = random.randint(0, image.shape[1] - 1)
+            y = random.randint(0, image.shape[0] - 1)
+            brightness = random.randint(0, 255)
+            image[y, x] = [brightness, brightness, brightness]
+            
+
+    def draw_input_box(self, image):
+        """Draws the text input box with glowing edges."""
+        cv2.rectangle(image, (50, 50), (300, 100), (200, 200, 200), -1)
+        cv2.rectangle(image, (50, 50), (300, 100), (255, 255, 255), 2)  # White border
 
 
-
-
-
-
+    def draw_input_text(self, image):
+        """Displays the current input text."""
+        cv2.putText(image, self.input_text, (60, 85), self.font, 0.7, (0, 0, 0), 2)
 
     def initialiser_sprites(self):
         """
@@ -130,7 +190,7 @@ class spaceInvader :
             vitesse_vaisseau=VITESSE_VAISSEAU,
             largeur=VAISSEAU_WIDTH,
             hauteur=VAISSEAU_HEIGHT,
-            point_de_vie=2
+            point_de_vie=1
         )
 
         ennemis = [
