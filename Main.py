@@ -14,15 +14,35 @@ from Parsers import *
 from models import *
 from BDD import *
 from Constant import *
+from Son import *
 
 
 
 def main():
-    game = spaceInvader()
+
+
+    pygame.init()
+    init_son()
+
+    explosion_sound = charger_effet_sonore("son/sonExplosion.mp3")
+    explosion_sound.set_volume(0.1)  # Explosion à 10 % du volume
+
+    # Charger les effets sonores
+    tir_sound = charger_effet_sonore("son/sonTir.mp3")
+    tir_sound.set_volume(0.01)  # Tir à 5 % du volume
+
+    # Charger et jouer la musique de fond
+    charger_musique("son/MusiqueFondJeu.mp3") 
+    jouer_musique(volume=1.0)
+
+
+    
+    game = spaceInvader(explosion_sound)
     game_graphic = graphic()
     nombre_ennemi=1
     name=game.menu_princiapl()
     
+
     while True:
         # Initialisation de la fenêtre de jeu
         cv2.namedWindow("Space Invader")
@@ -55,7 +75,7 @@ def main():
         tracking = SkeletonTracker(params)
 
         previous_x = None
-        game_camera = camera(cap)
+        game_camera = camera(cap, tir_sound)
 
         # Boucle principale
         game_over = False
@@ -77,7 +97,7 @@ def main():
 
             #Si tous les ennemis detruits :
             if not ennemis:
-                if nombre_ennemi <= 3:
+                if nombre_ennemi <= 5:
                     nombre_ennemi+=1
                 _ , ennemis, _ = game.initialiser_objets(vaisseau_sprite, ennemi_sprite,nombre_ennemi,name)
 
@@ -125,6 +145,7 @@ def main():
                 else:
                     for i, game in enumerate(games[:20], start=1):  # Limiter à 20 lignes
                         print(f"{i}. ID: {game['id']}, Joueur: {game['player_name']}, Score: {game['score']}, Date: {game['timestamp']}")
+                arreter_musique()
                 return
             
 
@@ -144,8 +165,10 @@ def main():
                 else:
                     for i, game in enumerate(games[:20], start=1):  # Limiter à 20 lignes
                         print(f"{i}. ID: {game['id']}, Joueur: {game['player_name']}, Score: {game['score']}, Date: {game['timestamp']}")
+                arreter_musique()
 
         cv2.destroyWindow("Space Invader")  
+    
 
 
 if __name__ == "__main__":

@@ -21,10 +21,11 @@ from models import *
 
 class spaceInvader : 
     
-    def __init__(self):
+    def __init__(self, explosion_sound):
         self.input_text = ""  # Stocke le texte entré
         self.confirmed_text = ""  # Stocke le texte confirmé
         self.is_typing = False  # Flag pour détecter si on est en train de taper
+        self.explosion_sound = explosion_sound
             
 
     def mouse_callback(self, event, x, y, flags, param):
@@ -210,7 +211,9 @@ class spaceInvader :
                 game_graphic.dessiner_projectile_vaisseau(game_window, proj)
                 for Ennemi in ennemis[:]:
                     if Ennemi.ennemi_projectile_interaction(proj):
-                        vaisseau_proj.remove(proj)
+                        if self.explosion_sound:
+                            self.explosion_sound.play()
+                            vaisseau_proj.remove(proj)
 
         return vaisseau_proj
 

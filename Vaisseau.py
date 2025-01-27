@@ -1,4 +1,5 @@
 from Projectile import projectile
+from Son import *
 
 class vaisseau:
     def __init__(self, position, graphic, vitesse_vaisseau, hauteur, largeur, point_de_vie):
@@ -92,15 +93,19 @@ class vaisseau:
     entree : le projectile
     sortie : un booleen
     """
-    def vaisseau_projectile_interaction(self, projectile):
+    def vaisseau_projectile_interaction(self, projectile, explosion_sound=None):
         if (projectile.getPosition()[0] > self.position[0] and
                 projectile.getPosition()[0] < self.position[0] + self.largeur and
                 projectile.getPosition()[1]>self.position[1] and
                 projectile.getPosition()[1]<self.position[1] + self.hauteur):
             self.point_de_vie -= projectile.getDegat()
+            
+            # Jouer le son d'explosion si disponible
+            if explosion_sound:
+                explosion_sound.play()
+            
             return True
         return False
-
 
 
 
