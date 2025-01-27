@@ -26,29 +26,7 @@ class spaceInvader :
         self.confirmed_text = ""  # Stocke le texte confirmé
         self.is_typing = False  # Flag pour détecter si on est en train de taper
         self.explosion_sound = explosion_sound
-            
-
-    def mouse_callback(self, event, x, y, flags, param):
-        """Handles mouse clicks for text input and OK button."""
-        if event == cv2.EVENT_LBUTTONDOWN:
-            # Check if the click is inside the text input box
-            if 50 <= x <= 300 and 50 <= y <= 100:  # Text input area
-                self.is_typing = True  # Start typing
-            # Check if the click is on the OK button
-            elif 350 <= x <= 450 and 50 <= y <= 100:  # OK button
-                self.is_typing = False  # Stop typing
-                self.confirmed_text = self.input_text  # Confirm the text
-
-    import cv2
-import numpy as np
-import random
-
-class spaceInvader : 
-    def __init__(self):
-        self.input_text = ""  # Stocke le texte entré
-        self.confirmed_text = ""  # Stocke le texte confirmé
-        self.is_typing = False  # Flag pour détecter si on est en train de taper
-        self.font = cv2.FONT_HERSHEY_SIMPLEX  
+        self.font = cv2.FONT_HERSHEY_SIMPLEX         
 
     def mouse_callback(self, event, x, y, flags, param):
         """Handles mouse clicks for text input and OK button."""
@@ -190,7 +168,7 @@ class spaceInvader :
             vitesse_vaisseau=VITESSE_VAISSEAU,
             largeur=VAISSEAU_WIDTH,
             hauteur=VAISSEAU_HEIGHT,
-            point_de_vie=1
+            point_de_vie=2
         )
 
         ennemis = [
