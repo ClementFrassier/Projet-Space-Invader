@@ -15,10 +15,11 @@ from models import *
 from BDD import *
 from Constant import *
 
-game = spaceInvader()
-game_graphic = graphic()
+
 
 def main():
+    game = spaceInvader()
+    game_graphic = graphic()
     nombre_ennemi=1
     name=game.menu_princiapl()
     
@@ -59,8 +60,7 @@ def main():
         # Boucle principale
         game_over = False
         while not game_over and cap.isOpened():
-            print(f"Player Name: {name}")
-
+            
             game_window.fill(0)
 
             # Gestion de la caméra
@@ -117,7 +117,16 @@ def main():
                     print(f"Erreur lors de l'enregistrement : {result['error']}")
                 else:
                     print(f"Partie enregistrée avec succès pour {name} avec un score de {Jeu.score}.")
+                # Afficher les 20 premières lignes de la base de données
+                print("\n--- Top 20 des scores enregistrés ---")
+                games = get_games()
+                if "error" in games:
+                    print(f"Erreur lors de la récupération des scores : {games['error']}")
+                else:
+                    for i, game in enumerate(games[:20], start=1):  # Limiter à 20 lignes
+                        print(f"{i}. ID: {game['id']}, Joueur: {game['player_name']}, Score: {game['score']}, Date: {game['timestamp']}")
                 return
+            
 
             elif key == 32:  # Barre d'espace pour relancer
                 # Appeler la fonction pour mettre à jour la base de données
@@ -127,6 +136,15 @@ def main():
                 else:
                     print(f"Partie enregistrée avec succès pour {name} avec un score de {Jeu.score}.")
                     game_over = False
+                # Afficher les 20 premières lignes de la base de données
+                print("\n--- Top 20 des scores enregistrés ---")
+                games = get_games()
+                if "error" in games:
+                    print(f"Erreur lors de la récupération des scores : {games['error']}")
+                else:
+                    for i, game in enumerate(games[:20], start=1):  # Limiter à 20 lignes
+                        print(f"{i}. ID: {game['id']}, Joueur: {game['player_name']}, Score: {game['score']}, Date: {game['timestamp']}")
+
         cv2.destroyWindow("Space Invader")  
 
 
