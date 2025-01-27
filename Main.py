@@ -12,7 +12,7 @@ from FPSCounter import *
 from SkeletonTracker import *
 from Parsers import *
 from models import *
-
+from BDD import *
 from Constant import *
 
 game = spaceInvader()
@@ -110,13 +110,25 @@ def main():
             cv2.imshow("Space Invader", game_window)
             key = cv2.waitKey(1) & 0xFF
 
-            if key == 27:  # ESC pour quitter
-                cv2.destroyAllWindows()
+            if key == 27:
+                # Appeler la fonction pour mettre à jour la base de données
+                result = save_game(name, Jeu.score)
+                if "error" in result:
+                    print(f"Erreur lors de l'enregistrement : {result['error']}")
+                else:
+                    print(f"Partie enregistrée avec succès pour {name} avec un score de {Jeu.score}.")
                 return
-            elif key == 32:  # Barre d'espace pour relancer
-                game_over = False  
 
+            elif key == 32:  # Barre d'espace pour relancer
+                # Appeler la fonction pour mettre à jour la base de données
+                result = save_game(name, Jeu.score)
+                if "error" in result:
+                    print(f"Erreur lors de l'enregistrement : {result['error']}")
+                else:
+                    print(f"Partie enregistrée avec succès pour {name} avec un score de {Jeu.score}.")
+                    game_over = False
         cv2.destroyWindow("Space Invader")  
+
 
 if __name__ == "__main__":
     main()
