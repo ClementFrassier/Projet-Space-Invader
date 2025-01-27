@@ -20,15 +20,16 @@ game_graphic = graphic()
 
 def main():
     nombre_ennemi=1
-
+    name=game.menu_princiapl()
+    
     while True:
         # Initialisation de la fenêtre de jeu
         cv2.namedWindow("Space Invader")
         game_window = np.zeros((WINDOW_HEIGHT, WINDOW_WIDTH, 3), dtype=np.uint8)
-
+        
         # Initialisation des sprites et objets
         projectile_vaisseau_sprite, projectile_ennemi_sprite, vaisseau_sprite, ennemi_sprite = game.initialiser_sprites()
-        Vaisseau, ennemis, Jeu = game.initialiser_objets(vaisseau_sprite, ennemi_sprite,nombre_ennemi)
+        Vaisseau, ennemis, Jeu = game.initialiser_objets(vaisseau_sprite, ennemi_sprite,nombre_ennemi,name)
 
         # Variables de jeu
         ennemis_direction = [VITESSE_ENNEMI, 0]
@@ -58,6 +59,8 @@ def main():
         # Boucle principale
         game_over = False
         while not game_over and cap.isOpened():
+            print(f"Player Name: {name}")
+
             game_window.fill(0)
 
             # Gestion de la caméra
@@ -76,7 +79,7 @@ def main():
             if not ennemis:
                 if nombre_ennemi <= 3:
                     nombre_ennemi+=1
-                _ , ennemis, _ = game.initialiser_objets(vaisseau_sprite, ennemi_sprite,nombre_ennemi)
+                _ , ennemis, _ = game.initialiser_objets(vaisseau_sprite, ennemi_sprite,nombre_ennemi,name)
 
             # Déplacement et affichage des projectiles
             vaisseau_proj = game.gerer_projectiles_vaisseau(vaisseau_proj, ennemis, game_graphic, game_window)
@@ -111,7 +114,6 @@ def main():
                 cv2.destroyAllWindows()
                 return
             elif key == 32:  # Barre d'espace pour relancer
-
                 game_over = False  
 
         cv2.destroyWindow("Space Invader")  
