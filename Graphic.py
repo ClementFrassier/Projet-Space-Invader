@@ -1,90 +1,83 @@
 from Constant import *
 import cv2
 
-class graphic:
+class Graphic:
     def __init__(self):
         pass
     
-    def dessiner_barre_point_de_vie(self,fenetre, position, largeur, hauteur, point_de_vie, point_de_vie_max, couleur_fond=(50, 50, 50), couleur_point_de_vie=(0, 255, 0)):
+    def draw_health_bar(self, window, position, width, height, health, max_health, background_color=(50, 50, 50), health_color=(0, 255, 0)):
         """
-        Dessine une barre de point de vie.
+        Draws a health bar on the screen.
 
-        :param fenetre: Fenêtre de jeu.
-        :param position: Position (x, y) de la barre.
-        :param largeur: Largeur de la barre.
-        :param hauteur: Hauteur de la barre.
-        :param point_de_vie: Points de vie actuels.
-        :param point_de_vie_max: Points de vie maximum.
-        :param couleur_fond: Couleur du fond de la barre.
-        :param couleur_point_de_vie: Couleur des points de vie restants.
+        :param window: The game window.
+        :param position: Position (x, y) of the health bar.
+        :param width: Width of the health bar.
+        :param height: Height of the health bar.
+        :param health: Current health.
+        :param max_health: Maximum health.
+        :param background_color: Background color of the bar.
+        :param health_color: Color of the remaining health.
         """
-        point_de_vie = max(0, min(point_de_vie, point_de_vie_max))
-        largeur_point_de_vie = int((point_de_vie / point_de_vie_max) * largeur)
-        cv2.rectangle(fenetre, position, (position[0] + largeur, position[1] + hauteur), couleur_fond, -1)
-        if point_de_vie > 0:
-            cv2.rectangle(fenetre, position, (position[0] + largeur_point_de_vie, position[1] + hauteur), couleur_point_de_vie, -1)
+        health = max(0, min(health, max_health))
+        health_width = int((health / max_health) * width)
+        cv2.rectangle(window, position, (position[0] + width, position[1] + height), background_color, -1)
+        if health > 0:
+            cv2.rectangle(window, position, (position[0] + health_width, position[1] + height), health_color, -1)
 
-
-
-    def dessiner_ennemi(self,fenetre, ennemi):
+    def draw_enemy(self, window, enemy):
         """
-        Dessine un ennemi sur la fenêtre de jeu.
+        Draws an enemy on the game window.
 
-        :param fenetre: Fenêtre de jeu.
-        :param ennemi: Objet ennemi avec des attributs position, graphic, largeur, hauteur, point_de_vie, point_de_vie_max.
+        :param window: The game window.
+        :param enemy: Enemy object with attributes position, graphic, width, height, health, max_health.
         """
-        if ennemi.point_de_vie > 0:
-            # Dessiner l'ennemi
-            fenetre[
-                ennemi.position[1]:ennemi.position[1] + ENNEMI_HEIGHT,
-                ennemi.position[0]:ennemi.position[0] + ENNEMI_WIDTH
-            ] = ennemi.graphic
+        if enemy.health_points > 0:
+            # Draw the enemy
+            window[
+                enemy.position[1]:enemy.position[1] + ENEMY_HEIGHT,
+                enemy.position[0]:enemy.position[0] + ENEMY_WIDTH
+            ] = enemy.sprite
 
-        # Dessiner la barre de vie de l'ennemi
-        self.dessiner_barre_point_de_vie(
-            fenetre,
-            position=(ennemi.position[0], ennemi.position[1] - 10),
-            largeur=ENNEMI_WIDTH,
-            hauteur=5,
-            point_de_vie=ennemi.point_de_vie,
-            point_de_vie_max=ennemi.point_de_vie_max
+        # Draw the enemy's health bar
+        self.draw_health_bar(
+            window,
+            position=(enemy.position[0], enemy.position[1] - 10),
+            width=ENEMY_WIDTH,
+            height=5,
+            health=enemy.health_points,
+            max_health=enemy.max_health_points
         )
 
-
-    def dessiner_vaisseau(self,fenetre, vaisseau):
+    def draw_ship(self, window, ship):
         """
-        Dessine le vaisseau sur la fenêtre de jeu.
+        Draws the ship on the game window.
 
-        :param fenetre: Fenêtre de jeu.
-        :param objet: Objet vaisseau avec des attributs position, graphic, largeur, hauteur, point_de_vie, point_de_vie_max.
+        :param window: The game window.
+        :param ship: Ship object with attributes position, graphic, width, height, health, max_health.
         """
-        if vaisseau.point_de_vie > 0:
-            # Dessiner le vaisseau
-            fenetre[
-                vaisseau.position[1]:vaisseau.position[1] + VAISSEAU_HEIGHT,
-                vaisseau.position[0]:vaisseau.position[0] + VAISSEAU_WIDTH
-            ] = vaisseau.graphic
+        if ship.health_points > 0:
+            # Draw the ship
+            window[
+                ship.position[1]:ship.position[1] + SHIP_HEIGHT,
+                ship.position[0]:ship.position[0] + SHIP_WIDTH
+            ] = ship.graphic
 
-            # Dessiner la barre de vie du vaisseau
-            
-            self.dessiner_barre_point_de_vie(
-                fenetre,
-                position=(vaisseau.position[0], vaisseau.position[1] - 10),
-                largeur=VAISSEAU_WIDTH,
-                hauteur=5,
-                point_de_vie=vaisseau.point_de_vie,
-                point_de_vie_max=vaisseau.point_de_vie_max
+            # Draw the ship's health bar
+            self.draw_health_bar(
+                window,
+                position=(ship.position[0], ship.position[1] - 10),
+                width=SHIP_WIDTH,
+                height=5,
+                health=ship.health_points,
+                max_health=ship.max_health_points
             )
-    
 
-        
-        # Fonction pour dessiner les projectiles du vaisseau
-    def dessiner_projectile_vaisseau(self, fenetre, projectile):
+    def draw_ship_projectile(self, window, projectile):
         """
-        Dessine un projectile du vaisseau sur la fenêtre de jeu.
+        Draws a ship's projectile on the game window.
         
-        :param fenetre: Fenêtre de jeu.
-        :param projectile: Objet projectile du vaisseau avec des attributs position et graphic.
+        :param window: The game window.
+        :param projectile: Ship's projectile object with attributes position and graphic.
         """
         if projectile is not None:
             y_start = max(0, projectile.position[1])
@@ -94,15 +87,14 @@ class graphic:
             
             if y_end > y_start and x_end > x_start:
                 graphic_part = projectile.graphic[:y_end - y_start, :x_end - x_start]
-                fenetre[y_start:y_end, x_start:x_end] = graphic_part
+                window[y_start:y_end, x_start:x_end] = graphic_part
 
-    # Fonction pour dessiner les projectiles ennemis
-    def dessiner_projectile_ennemi(self, fenetre, projectile):
+    def draw_enemy_projectile(self, window, projectile):
         """
-        Dessine un projectile des ennemis sur la fenêtre de jeu.
+        Draws an enemy's projectile on the game window.
         
-        :param fenetre: Fenêtre de jeu.
-        :param projectile: Objet projectile de l'ennemi avec des attributs position et graphic.
+        :param window: The game window.
+        :param projectile: Enemy's projectile object with attributes position and graphic.
         """
         if projectile is not None:
             y_start = max(0, projectile.position[1])
@@ -112,4 +104,4 @@ class graphic:
             
             if y_end > y_start and x_end > x_start:
                 graphic_part = projectile.graphic[:y_end - y_start, :x_end - x_start]
-                fenetre[y_start:y_end, x_start:x_end] = graphic_part
+                window[y_start:y_end, x_start:x_end] = graphic_part

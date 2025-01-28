@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
-from Vaisseau import vaisseau
-from Ennemis import ennemi
+from Starship import spaceship
+from Enemies import enemy
 from Projectile import projectile
-from Jeu import jeu
+from Player import player
 from Constant import *
 import random
 import time
@@ -16,43 +16,51 @@ from SkeletonTracker import *
 from Parsers import *
 from models import *
 
-
-
-
-class spaceInvader : 
+class spaceInvader:
     
     def __init__(self, explosion_sound):
-        self.input_text = ""  # Stocke le texte entré
-        self.confirmed_text = ""  # Stocke le texte confirmé
-        self.is_typing = False  # Flag pour détecter si on est en train de taper
-        self.explosion_sound = explosion_sound
+        """
+        Initializes the Space Invaders game class.
 
-        self.font = cv2.FONT_HERSHEY_SIMPLEX  
-
-     
-
+        :param explosion_sound: Sound to play during explosions.
+        """
+        self.input_text = ""  # Stores the text entered by the player
+        self.confirmed_text = ""  # Stores the confirmed text
+        self.is_typing = False  # Flag to detect if the player is typing
+        self.explosion_sound = explosion_sound  # Explosion sound
+        self.font = cv2.FONT_HERSHEY_SIMPLEX  # Font used for text rendering
 
     def mouse_callback(self, event, x, y, flags, param):
-        """Handles mouse clicks for text input and OK button."""
+        """
+        Handles mouse click events for text input and the OK button.
+
+        :param event: Mouse event type
+        :param x, y: Mouse position
+        :param flags: Event flags
+        :param param: Additional parameters passed to the callback
+        """
         if event == cv2.EVENT_LBUTTONDOWN:
             # Check if the click is inside the text input box
-            if WINDOW_WIDTH // 2 - 125 <= x <= WINDOW_WIDTH // 2 + 125 and WINDOW_HEIGHT // 2 - 25 <= y <= WINDOW_HEIGHT // 2 + 25:  # Text input area
+            if WINDOW_WIDTH // 2 - 125 <= x <= WINDOW_WIDTH // 2 + 125 and WINDOW_HEIGHT // 2 - 25 <= y <= WINDOW_HEIGHT // 2 + 25:
                 self.is_typing = True  # Start typing
 
-
     def menu_principal(self):
-        """Displays the main menu, allowing the player to enter their name."""
-        cv2.namedWindow("Menu principal")
-        cv2.setMouseCallback("Menu principal", self.mouse_callback)  # Link the mouse callback
+        """
+        Displays the main menu where the player can enter their name.
+
+        :return: The player's confirmed name
+        """
+        cv2.namedWindow("Main Menu")
+        cv2.setMouseCallback("Main Menu", self.mouse_callback)  # Link mouse callback
 
         while True:
-            # Create the menu background (Space theme background)
-            menu_principal = np.zeros((WINDOW_HEIGHT, WINDOW_WIDTH, 3), dtype=np.uint8)
+            # Create the menu background (space theme)
+            main_menu = np.zeros((WINDOW_HEIGHT, WINDOW_WIDTH, 3), dtype=np.uint8)
 
-            # Add space background (a field of stars)
-            self.add_starfield(menu_principal)
+            # Add space background (stars field)
+            self.add_starfield(main_menu)
 
-            # Centering calculations
+            # Centering calculations for text input box
             text_box_width = 250
             text_box_height = 50
             center_x = WINDOW_WIDTH // 2
@@ -64,36 +72,33 @@ class spaceInvader :
             bottom_right_x = center_x + text_box_width // 2
             bottom_right_y = center_y + text_box_height // 2
 
-            cv2.rectangle(menu_principal, (top_left_x, top_left_y), (bottom_right_x, bottom_right_y), (200, 200, 200), -1)
-            cv2.rectangle(menu_principal, (top_left_x, top_left_y), (bottom_right_x, bottom_right_y), (255, 255, 255), 2)
+            cv2.rectangle(main_menu, (top_left_x, top_left_y), (bottom_right_x, bottom_right_y), (200, 200, 200), -1)
+            cv2.rectangle(main_menu, (top_left_x, top_left_y), (bottom_right_x, bottom_right_y), (255, 255, 255), 2)
 
             # Display the current input text inside the centered box
             text_position_x = top_left_x + 10
             text_position_y = top_left_y + 30
-            cv2.putText(menu_principal, self.input_text, (text_position_x, text_position_y), self.font, 0.7, (0, 0, 0), 2)
+            cv2.putText(main_menu, self.input_text, (text_position_x, text_position_y), self.font, 0.7, (0, 0, 0), 2)
 
-            # Add instruction text below the input box
-            # Instruction text
+            # Add instruction text
             instruction_text = "Press enter to play"
-            instruction_text2 = "Click the box below to enter your name"  # Keep as string
+            instruction_text2 = "Click the box below to enter your name"
 
-            # Get text sizes
+            # Calculate positions for instruction text
             text_size = cv2.getTextSize(instruction_text, self.font, 0.7, 2)[0]
             text_size2 = cv2.getTextSize(instruction_text2, self.font, 0.7, 2)[0]
 
-            # Calculate positions
             instruction_x = center_x - text_size[0] // 2
             instruction_y = bottom_right_y + 40
-
             instruction_x2 = center_x - text_size2[0] // 2
-            instruction_y2 = bottom_right_y - 75   # Adjusted to avoid overlap
+            instruction_y2 = bottom_right_y - 75
 
-            # Display text
-            cv2.putText(menu_principal, instruction_text, (instruction_x, instruction_y), self.font, 0.7, (255, 0, 255), 2)
-            cv2.putText(menu_principal, instruction_text2, (instruction_x2, instruction_y2), self.font, 0.7, (255, 0, 255), 2)
+            # Display instructions
+            cv2.putText(main_menu, instruction_text, (instruction_x, instruction_y), self.font, 0.7, (255, 0, 255), 2)
+            cv2.putText(main_menu, instruction_text2, (instruction_x2, instruction_y2), self.font, 0.7, (255, 0, 255), 2)
 
             # Show the menu
-            cv2.imshow("Menu principal", menu_principal)
+            cv2.imshow("Main Menu", main_menu)
             key = cv2.waitKey(1) & 0xFF
 
             # Handle keyboard input while typing
@@ -101,10 +106,10 @@ class spaceInvader :
                 if key == 8:  # Backspace
                     self.input_text = self.input_text[:-1]
                 elif key == 13:  # Enter key
-                    self.confirmed_text = self.input_text  # Confirm the input
+                    self.confirmed_text = self.input_text  # Confirm input
                     self.is_typing = False
-                    break  # Exit the menu to start the game
-                elif key != 255:  # Any other key (avoid unprintable keys)
+                    break  # Exit menu to start the game
+                elif key != 255:  # Any other key
                     self.input_text += chr(key)
 
             # Allow exiting the menu with the Escape key
@@ -115,172 +120,222 @@ class spaceInvader :
         cv2.destroyAllWindows()
         return self.confirmed_text  # Return the player's name
 
-
     def add_starfield(self, image):
-        """Adds a field of stars in the background to simulate space."""
+        """
+        Adds a field of stars to simulate space background.
+
+        :param image: Image to modify
+        """
         for _ in range(200):  # Number of stars
             x = random.randint(0, image.shape[1] - 1)
             y = random.randint(0, image.shape[0] - 1)
             brightness = random.randint(0, 255)
             image[y, x] = [brightness, brightness, brightness]
-            
 
     def draw_input_box(self, image):
-        """Draws the text input box with glowing edges."""
+        """
+        Draws the text input box with glowing edges.
+
+        :param image: Image to modify
+        """
         cv2.rectangle(image, (50, 50), (300, 100), (200, 200, 200), -1)
         cv2.rectangle(image, (50, 50), (300, 100), (255, 255, 255), 2)  # White border
 
-
     def draw_input_text(self, image):
-        """Displays the current input text."""
+        """
+        Displays the current input text.
+
+        :param image: Image to render text on
+        """
         cv2.putText(image, self.input_text, (60, 85), self.font, 0.7, (0, 0, 0), 2)
 
-    def initialiser_sprites(self):
+    def initialize_sprites(self):
         """
-        Initialise les sprites utilisés dans le jeu.
-        :return: Les sprites pour les projectiles, le vaisseau et les ennemis.
+        Initializes the sprites used in the game (projectiles, spaceship, enemies).
+
+        :return: Sprites for the projectiles, spaceship, and enemies.
         """
-        # Sprite des projectiles du vaisseau (bleu)
-        projectile_vaisseau_sprite = np.zeros((PROJECTILE_RADIUS * 2, PROJECTILE_RADIUS * 2, 3), dtype=np.uint8)
-        cv2.circle(projectile_vaisseau_sprite, (PROJECTILE_RADIUS, PROJECTILE_RADIUS), PROJECTILE_RADIUS, (255, 0, 0), -1)
+        # Spaceship projectile sprite (blue)
+        spaceship_projectile_sprite = np.zeros((PROJECTILE_RADIUS * 2, PROJECTILE_RADIUS * 2, 3), dtype=np.uint8)
+        cv2.circle(spaceship_projectile_sprite, (PROJECTILE_RADIUS, PROJECTILE_RADIUS), PROJECTILE_RADIUS, (255, 0, 0), -1)
 
-        # Sprite des projectiles ennemis (rouge)
-        projectile_ennemi_sprite = np.zeros((PROJECTILE_RADIUS * 2, PROJECTILE_RADIUS * 2, 3), dtype=np.uint8)
-        cv2.circle(projectile_ennemi_sprite, (PROJECTILE_RADIUS, PROJECTILE_RADIUS), PROJECTILE_RADIUS, (0, 0, 255), -1)
+        # Enemy projectile sprite (red)
+        enemy_projectile_sprite = np.zeros((PROJECTILE_RADIUS * 2, PROJECTILE_RADIUS * 2, 3), dtype=np.uint8)
+        cv2.circle(enemy_projectile_sprite, (PROJECTILE_RADIUS, PROJECTILE_RADIUS), PROJECTILE_RADIUS, (0, 0, 255), -1)
 
+        spaceship_sprite = cv2.imread("image/vaisseau.png", cv2.IMREAD_UNCHANGED)
+        enemy_sprite = cv2.imread("image/ennemi.png", cv2.IMREAD_UNCHANGED)
 
-        vaisseau_sprite = cv2.imread("image/vaisseau.png", cv2.IMREAD_UNCHANGED)
-        ennemi_sprite = cv2.imread("image/ennemi.png", cv2.IMREAD_UNCHANGED)
-
-        if vaisseau_sprite is None or ennemi_sprite is None:
-            raise FileNotFoundError("Un ou plusieurs fichiers d'image sont introuvables.")
+        if spaceship_sprite is None or enemy_sprite is None:
+            raise FileNotFoundError("One or more image files are missing.")
         
-        return projectile_vaisseau_sprite, projectile_ennemi_sprite, vaisseau_sprite, ennemi_sprite
+        return spaceship_projectile_sprite, enemy_projectile_sprite, spaceship_sprite, enemy_sprite
 
-
-
-    def initialiser_objets(self,vaisseau_sprite, ennemi_sprite, nombreEnnemis,nom):
+    def initialize_objects(self, spaceship_sprite, enemy_sprite, enemy_count, name):
         """
-        Initialise les objets principaux du jeu (vaisseau, ennemis).
-        :param vaisseau_sprite: Sprite du vaisseau.
-        :param ennemi_sprite: Sprite des ennemis.
-        :return: Le vaisseau et la liste d'ennemis.
+        Initializes the main objects in the game (spaceship, enemies).
+
+        :param spaceship_sprite: Sprite for the spaceship
+        :param enemy_sprite: Sprite for the enemies
+        :param enemy_count: Number of enemies to spawn
+        :param name: Player's name
+        :return: Spaceship, list of enemies, and the game object
         """
-        Vaisseau = vaisseau(
+        Spaceship = spaceship(
             position=[270, 500],
-            graphic=vaisseau_sprite,
-            vitesse_vaisseau=VITESSE_VAISSEAU,
-            largeur=VAISSEAU_WIDTH,
-            hauteur=VAISSEAU_HEIGHT,
-            point_de_vie=2
+            graphic=spaceship_sprite,
+            spaceship_speed=SHIP_SPEED,
+            width=SHIP_WIDTH,
+            height=SHIP_HEIGHT,
+            health_points=2
         )
 
-        ennemis = [
-            ennemi(
+        enemies = [
+            enemy(
                 position=[100 + i * 100, 100],
-                graphic=ennemi_sprite,
-                vitesse_ennemi=VITESSE_ENNEMI,
-                largeur=ENNEMI_WIDTH,
-                hauteur=ENNEMI_HEIGHT,
-                point_de_vie=1
+                sprite=enemy_sprite,
+                velocity=ENEMY_SPEED,
+                width=ENEMY_WIDTH,
+                height=ENEMY_HEIGHT,
+                health_points=1
             )
-            for i in range(nombreEnnemis)
+            for i in range(enemy_count)
         ]
-        Jeu = jeu(
-            joueur = nom,
+        Player = player(
+            player_name=name,
             score=0
         )
-        return Vaisseau, ennemis, Jeu
+        return Spaceship, enemies, Player
 
-    def create_vaisseau_proj(self,projectile_sprite,Vaisseau):
-        return projectile(
-                        graphic=projectile_sprite,
-                        vitesse_projectile=VITESSE_PROJECTILES,
-                        direction=-1,  # Monte
-                        degat=1,
-                        rayon=PROJECTILE_RADIUS,
-                        position=[Vaisseau.position[0] + VAISSEAU_WIDTH // 2, Vaisseau.position[1]]
-                    )
-
-    def create_ennemi_proj(self,projectile_sprite,Ennemi):
-        return projectile(
-                        graphic=projectile_sprite,
-                        vitesse_projectile=VITESSE_PROJECTILES_ENNEMI,
-                        direction=1,  # Descend
-                        degat=1,
-                        rayon=PROJECTILE_RADIUS,
-                        position=[Ennemi.position[0] + ENNEMI_WIDTH // 2, Ennemi.position[1] + ENNEMI_HEIGHT]
-                    )
-
-    def gerer_deplacement_ennemis(self,ennemis, ennemis_direction, jeu, game_graphic, game_window):
+    def create_spaceship_projectile(self, projectile_sprite, spaceship):
         """
-        Gère le déplacement des ennemis et leur interaction avec le jeu.
-        """
-        if ennemis:
-            # Vérification des limites de l'écran
-            ennemis_bounds = [min(e.position[0] for e in ennemis), max(e.position[0] + ENNEMI_WIDTH for e in ennemis)]
-            if ennemis_bounds[0] <= 0 or ennemis_bounds[1] >= WINDOW_WIDTH:
-                ennemis_direction[0] = -ennemis_direction[0]
+        Creates a new spaceship projectile.
 
-        if not ennemis:  # Si aucun ennemi n'est présent
+        :param projectile_sprite: Sprite for the projectile
+        :param spaceship: The spaceship object
+        :return: New spaceship projectile
+        """
+
+        return projectile(
+            graphic=projectile_sprite,
+            projectile_speed=PROJECTILE_SPEED,
+            direction=-1,  # Moves upwards
+            damage=1,
+            radius=PROJECTILE_RADIUS,
+            position=[spaceship.position[0] + SHIP_WIDTH // 2, spaceship.position[1]]
+        )
+
+    def create_enemy_projectile(self, projectile_sprite, enemy):
+        """
+        Creates a new enemy projectile.
+
+        :param projectile_sprite: Sprite for the projectile
+        :param enemy: The enemy object
+        :return: New enemy projectile
+        """
+        return projectile(
+            graphic=projectile_sprite,
+            projectile_speed=ENEMY_PROJECTILE_SPEED,
+            direction=1,  # Moves downwards
+            damage=1,
+            radius=PROJECTILE_RADIUS,
+            position=[enemy.position[0] + ENEMY_WIDTH // 2, enemy.position[1] + ENEMY_HEIGHT]
+        )
+
+    def handle_enemy_movement(self, enemies, enemy_direction, game, game_graphics, game_window):
+        """
+        Handles the movement of enemies and their interaction with the game.
+
+        :param enemies: List of enemy objects
+        :param enemy_direction: Direction of enemy movement
+        :param game: Game object
+        :param game_graphics: Game graphics object
+        :param game_window: Game window to render
+        :return: Updated list of enemies
+        """
+        if enemies:
+            # Check the screen bounds for enemies
+            enemy_bounds = [min(e.position[0] for e in enemies), max(e.position[0] + ENEMY_WIDTH for e in enemies)]
+            if enemy_bounds[0] <= 0 or enemy_bounds[1] >= WINDOW_WIDTH:
+                enemy_direction[0] = -enemy_direction[0]
+
+        if not enemies:  # If no enemies are present
             return None
 
-        for Ennemi in ennemis[:]:
-            Ennemi.position[0] += ennemis_direction[0]
-            # Affichage des ennemis
-            game_graphic.dessiner_ennemi(game_window, Ennemi)
+        for enemy in enemies[:]:
+            enemy.position[0] += enemy_direction[0]
+            # Render the enemies
+            game_graphics.draw_enemy(game_window, enemy)
+            print("OKKKKK")
+            if enemy.health_points <= 0:
+                print("OKKKKK ENEMI")
+                game.score += 1
+                enemies.remove(enemy)
+        return enemies
 
-            if Ennemi.point_de_vie <= 0:
-                ennemis.remove(Ennemi)
-                jeu.score += 1
-
-        return ennemis
-
-
-    def gerer_projectiles_vaisseau(self,vaisseau_proj, ennemis, game_graphic, game_window):
+    def handle_spaceship_projectiles(self, spaceship_projectiles, enemies, game_graphics, game_window):
         """
-        Gère le déplacement des projectiles du vaisseau et leurs interactions.
+        Handles the movement of spaceship projectiles and their interactions with enemies.
+
+        :param spaceship_projectiles: List of spaceship projectiles
+        :param enemies: List of enemies
+        :param game_graphics: Game graphics object
+        :param game_window: Game window to render
+        :return: Updated list of spaceship projectiles
         """
-        if not ennemis:  # Vérifie si ennemis est vide ou None
-            return vaisseau_proj  # Pas d'ennemis à gérer, retourne juste les projectiles
+        for projectile in spaceship_projectiles[:]:
+            projectile.position[1] += projectile.direction * projectile.projectile_speed
+            if projectile.position[1] < 0 or projectile.position[1] > WINDOW_HEIGHT:
+                spaceship_projectiles.remove(projectile)
+                continue
 
+            for enemy in enemies[:]:
+                if self.check_collision(projectile, enemy):
+                    spaceship_projectiles.remove(projectile)
+                    enemy.health_points -= projectile.damage
+                 
+                    break
 
-        for proj in vaisseau_proj[:]:
-            proj.move_projectile(1)  # Déplacement vers le haut
-            if proj.is_out_of_bounds(WINDOW_HEIGHT):
-                vaisseau_proj.remove(proj)
-            else:
-                game_graphic.dessiner_projectile_vaisseau(game_window, proj)
-                for Ennemi in ennemis[:]:
-                    if Ennemi.ennemi_projectile_interaction(proj):
-                        if self.explosion_sound:
-                            self.explosion_sound.play()
-                            vaisseau_proj.remove(proj)
+            game_graphics.draw_ship_projectile(game_window, projectile)
+        
+        return spaceship_projectiles
 
-        return vaisseau_proj
-
-
-    def gerer_projectiles_ennemi(self, ennemi_proj, Vaisseau, ennemis, projectile_sprite, game_graphic, game_window):
+    def check_collision(self, projectile, enemy):
         """
-        Gère le déplacement des projectiles des ennemis et leurs interactions avec le vaisseau.
+        Checks if a projectile has collided with an enemy.
+
+        :param projectile: The projectile object
+        :param enemy: The enemy object
+        :return: True if collision occurs, False otherwise
+        """
+        return (
+            projectile.position[0] > enemy.position[0] and
+            projectile.position[0] < enemy.position[0] + ENEMY_WIDTH and
+            projectile.position[1] > enemy.position[1] and
+            projectile.position[1] < enemy.position[1] + ENEMY_HEIGHT
+        )
+    
+    def manage_enemy_projectiles(self, enemy_projectiles, ship, enemies, projectile_sprite, game_graphic, game_window):
+        """
+        Manages the movement of enemy projectiles and their interactions with the ship.
         """
         import random
 
-        # Gestion du tir des ennemis
-        for Ennemi in ennemis:
-            if random.random() < PROBA_TIR_ENNEMI: #Gener un tire entre 0 et 1 si il est inferieur a la proba il tire
-                nouveau_proj = self.create_ennemi_proj(projectile_sprite, Ennemi)
-                ennemi_proj.append(nouveau_proj)
+        # Handling enemy firing
+        for enemy in enemies:
+            if random.random() < ENEMY_FIRE_PROBABILITY:  # Generate a shot between 0 and 1; if it’s less than the probability, it fires
+                new_proj = self.create_enemy_projectile(projectile_sprite, enemy)
+                enemy_projectiles.append(new_proj)
 
-        # Déplacement des projectiles existants
-        for proj in ennemi_proj[:]:
-            proj.move_projectile(1)  # Déplacement vers le bas
+        # Moving existing projectiles
+        for proj in enemy_projectiles[:]:
+            proj.move_projectile(1)  # Moving downwards
             if proj.is_out_of_bounds(WINDOW_HEIGHT):
-                ennemi_proj.remove(proj)
+                enemy_projectiles.remove(proj)
             else:
-                game_graphic.dessiner_projectile_ennemi(game_window, proj)
-                if Vaisseau.vaisseau_projectile_interaction(proj):
-                    ennemi_proj.remove(proj)
+                game_graphic.draw_enemy_projectile(game_window, proj)
+                if ship.spaceship_projectile_interaction(proj):
+                    enemy_projectiles.remove(proj)
 
-        return ennemi_proj
+        return enemy_projectiles
 
